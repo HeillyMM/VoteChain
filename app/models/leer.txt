@@ -1,7 +1,0 @@
-En esta carpeta se va a:
-Crear modelos con SQLAlchemy:
-1. Usuario
-2. Bloque
-etc
-
-Preparar estructura para ORM

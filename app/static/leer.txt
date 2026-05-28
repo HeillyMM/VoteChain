@@ -1,4 +1,0 @@
-En esta carpeta se va a:
-CSS (Bootstrap + estilos propios)
-JavaScript (interacciones básicas)
-Imágenes del sistema

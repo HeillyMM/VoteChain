@@ -1,8 +1,0 @@
-En esta carpeta se va a:
-Lógica principal del blockchain:
-
-1. creación de bloques
-2. cálculo de hash (hashlib)
- etc...
-
-* * * Conectar con models y controllers

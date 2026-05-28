@@ -1,9 +1,0 @@
-En esta carpeta se va a:
-Crear páginas HTML:
-- index
-- dashboard
-etc ...
-
-Usar Jinja para mostrar datos desde Flask
-
-* * * Conectar formularios con backend
