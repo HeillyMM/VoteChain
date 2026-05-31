@@ -275,7 +275,6 @@ CREATE TABLE IF NOT EXISTS elecciones (
     estado            ENUM('CONFIGURACION','ACTIVA',
                            'SUSPENDIDA','CERRADA')
                                    NOT NULL DEFAULT 'CONFIGURACION',
-    recinto_id        INT          NOT NULL,
     fecha_inicio      DATETIME     NOT NULL,
     fecha_fin         DATETIME     NULL,
     clave_publica_pem TEXT         NULL,
@@ -286,11 +285,19 @@ CREATE TABLE IF NOT EXISTS elecciones (
                                    ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_codigo_eleccion (codigo),
-    CONSTRAINT fk_eleccion_recinto FOREIGN KEY (recinto_id)
-        REFERENCES recintos (id),
     CONSTRAINT fk_eleccion_creador FOREIGN KEY (created_by)
         REFERENCES usuarios (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS recintos_elecciones(
+    recinto_id INT NOT NULL,
+    eleccion_id INT NOT NULL,
+    PRIMARY KEY (recinto_id,eleccion_id),
+    CONSTRAINT fk_id_recinto FOREIGN KEY (recinto_id)
+    REFERENCES recintos (id),
+    CONSTRAINT fk_id_eleccion FOREIGN KEY (eleccion_id)
+    REFERENCES elecciones (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;;
 
 -- ── Candidatos ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS candidatos (
