@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}
+Registrar Candidato
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+```
+<div class="col-lg-8">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white">
+
+            <h3 class="mb-0">
+                Registro de Candidato
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <form>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Nombre Completo
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Ingrese el nombre completo">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Cédula de Identidad
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Ej. 1234567 LP">
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Partido Político
+                        </label>
+
+                        <select class="form-select">
+
+                            <option selected>
+                                Seleccione un partido
+                            </option>
+
+                            <option>
+                                Libre
+                            </option>
+
+                            <option>
+                                Partido Demócrata Cristiano
+                            </option>
+
+                            <option>
+                                Unidad Nacional
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Departamento
+                        </label>
+
+                        <select class="form-select">
+
+                            <option>La Paz</option>
+                            <option>Cochabamba</option>
+                            <option>Santa Cruz</option>
+                            <option>Oruro</option>
+                            <option>Potosí</option>
+                            <option>Tarija</option>
+                            <option>Chuquisaca</option>
+                            <option>Beni</option>
+                            <option>Pando</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Fotografía del Candidato
+                    </label>
+
+                    <input
+                        type="file"
+                        class="form-control">
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Logo del Partido
+                    </label>
+
+                    <input
+                        type="file"
+                        class="form-control">
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Propuesta Electoral
+                    </label>
+
+                    <textarea
+                        class="form-control"
+                        rows="5"
+                        placeholder="Ingrese la propuesta electoral">
+                    </textarea>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Estado
+                    </label>
+
+                    <select class="form-select">
+
+                        <option selected>
+                            Activo
+                        </option>
+
+                        <option>
+                            Inactivo
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="text-center mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-success btn-lg">
+
+                        Guardar Candidato
+
+                    </button>
+
+                    <a href="/candidatos"
+                       class="btn btn-secondary btn-lg">
+
+                        Cancelar
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+{% endblock %}

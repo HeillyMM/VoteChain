@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestión de Candidatos
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+```
+<div>
+
+    <h2 class="fw-bold">
+        Gestión de Candidatos
+    </h2>
+
+    <p class="text-muted">
+        Administración de candidatos registrados para las elecciones.
+    </p>
+
+</div>
+
+<a href="/candidato/nuevo"
+   class="btn btn-primary">
+    + Nuevo Candidato
+</a>
+```
+
+</div>
+
+<div class="row g-4">
+
+```
+<!-- CANDIDATO 1 -->
+<div class="col-lg-4 col-md-6">
+
+    <div class="card shadow-sm h-100">
+
+        <img src="{{ url_for('static', filename='img/candidatos/JorgeTutoQuiroga.png') }}"
+             class="card-img-top"
+             alt="Jorge Tuto Quiroga">
+
+        <div class="card-body text-center">
+
+            <h5 class="card-title fw-bold">
+                Jorge Tuto Quiroga
+            </h5>
+
+            <img src="{{ url_for('static', filename='img/partidos/libre.png') }}"
+                 class="logo-partido mb-2"
+                 alt="Libre">
+
+            <p class="text-muted">
+                Libre
+            </p>
+
+            <span class="badge bg-success mb-3">
+                Activo
+            </span>
+
+            <div class="d-flex justify-content-center gap-2">
+
+                <button class="btn btn-warning btn-sm">
+                    Editar
+                </button>
+
+                <button class="btn btn-danger btn-sm">
+                    Eliminar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- CANDIDATO 2 -->
+<div class="col-lg-4 col-md-6">
+
+    <div class="card shadow-sm h-100">
+
+        <img src="{{ url_for('static', filename='img/candidatos/RodrigoPaz.png') }}"
+             class="card-img-top"
+             alt="Rodrigo Paz">
+
+        <div class="card-body text-center">
+
+            <h5 class="card-title fw-bold">
+                Rodrigo Paz
+            </h5>
+
+            <img src="{{ url_for('static', filename='img/partidos/pdc.png') }}"
+                 class="logo-partido mb-2"
+                 alt="PDC">
+
+            <p class="text-muted">
+                Partido Demócrata Cristiano
+            </p>
+
+            <span class="badge bg-success mb-3">
+                Activo
+            </span>
+
+            <div class="d-flex justify-content-center gap-2">
+
+                <button class="btn btn-warning btn-sm">
+                    Editar
+                </button>
+
+                <button class="btn btn-danger btn-sm">
+                    Eliminar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- CANDIDATO 3 -->
+<div class="col-lg-4 col-md-6">
+
+    <div class="card shadow-sm h-100">
+
+        <img src="{{ url_for('static', filename='img/candidatos/SamuelDoriaMedina.png') }}"
+             class="card-img-top"
+             alt="Samuel Doria Medina">
+
+        <div class="card-body text-center">
+
+            <h5 class="card-title fw-bold">
+                Samuel Doria Medina
+            </h5>
+
+            <img src="{{ url_for('static', filename='img/partidos/unidad.png') }}"
+                 class="logo-partido mb-2"
+                 alt="Unidad Nacional">
+
+            <p class="text-muted">
+                Unidad Nacional
+            </p>
+
+            <span class="badge bg-success mb-3">
+                Activo
+            </span>
+
+            <div class="d-flex justify-content-center gap-2">
+
+                <button class="btn btn-warning btn-sm">
+                    Editar
+                </button>
+
+                <button class="btn btn-danger btn-sm">
+                    Eliminar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+{% endblock %}

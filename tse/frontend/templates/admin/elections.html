@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Elecciones{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+
+    <div>
+        <h2 class="fw-bold">Gestión de Elecciones</h2>
+        <p class="text-muted">
+            Administración de procesos electorales.
+        </p>
+    </div>
+
+    <button class="btn btn-primary">
+        Nueva Elección
+    </button>
+
+</div>
+
+<div class="card">
+
+    <div class="card-body">
+
+        <table class="table table-hover">
+
+            <thead class="table-dark">
+
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>1</td>
+                    <td>Elecciones Generales 2026</td>
+
+                    <td>
+                        <span class="badge bg-success">
+                            Activa
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <button class="btn btn-warning btn-sm">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger btn-sm">
+                            Cerrar
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
