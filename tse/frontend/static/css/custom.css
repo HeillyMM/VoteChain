@@ -1,0 +1,138 @@
+body{
+background-color:#f4f6f9;
+min-height:100vh;
+}
+
+.navbar-brand{
+font-size:1.4rem;
+font-weight:700;
+}
+
+/* =========================
+TARJETAS
+========================= */
+
+.card{
+border:none;
+border-radius:20px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-5px);
+box-shadow:0 0 20px rgba(0,0,0,.15);
+}
+
+.card h2{
+color:#5b3df5;
+font-weight:bold;
+}
+
+/* =========================
+IMÁGENES
+========================= */
+
+.card-img-top{
+height:300px;
+object-fit:cover;
+}
+
+.logo-partido{
+width:120px;
+height:80px;
+object-fit:contain;
+}
+
+
+/* =========================
+FORMULARIOS
+========================= */
+
+.form-control{
+border-radius:10px;
+}
+
+.form-check-input{
+width:1.4rem;
+height:1.4rem;
+cursor:pointer;
+}
+
+/* Radio Button Boleta */
+
+.candidato-radio{
+width:35px;
+height:35px;
+cursor:pointer;
+border-color: black;
+}
+
+/* =========================
+BOTONES
+========================= */
+
+.btn{
+border-radius:10px;
+}
+
+.btn-primary{
+background:#5b3df5;
+border:none;
+font-weight:600;
+}
+
+.btn-primary:hover
+
+.btn-success{
+font-weight:600;
+}
+
+/* Botón Emitir Voto */
+
+.btn-votar{
+font-size:1.4rem;
+font-weight:700;
+padding:15px 60px;
+border-radius:15px;
+min-width:250px;
+}
+
+/* =========================
+TABLAS
+========================= */
+
+.table{
+vertical-align:middle;
+}
+
+.table-hover tbody tr:hover
+
+.table-dark th{
+text-align:center;
+}
+
+/* =========================
+BADGES
+========================= */
+
+.badge{
+font-size:0.9rem;
+padding:8px 12px;
+}
+
+/* =========================
+TEXTOS
+========================= */
+
+.display-6{
+color:#5b3df5;
+}
+
+/* =========================
+FOOTER
+========================= */
+
+footer{
+margin-top:auto;
+}

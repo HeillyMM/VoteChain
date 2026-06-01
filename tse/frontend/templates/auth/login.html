@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}
+Iniciar Sesión
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center align-items-center">
+
+    <div class="col-lg-5 col-md-7">
+
+        <div class="card shadow-lg border-0">
+
+            <div class="card-body p-5">
+
+                <div class="text-center mb-4">
+
+                    <h1 class="display-6 fw-bold">
+                        🗳️ VoteChain
+                    </h1>
+
+                    <p class="text-muted">
+                        Sistema de Votación Electrónica
+                    </p>
+
+                </div>
+
+                <h3 class="text-center mb-4">
+                    Iniciar Sesión
+                </h3>
+
+                <form method="POST">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Usuario
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control form-control-lg"
+                            name="usuario"
+                            placeholder="Ingrese su usuario"
+                            required>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Contraseña
+                        </label>
+
+                        <input
+                            type="password"
+                            class="form-control form-control-lg"
+                            name="password"
+                            placeholder="Ingrese su contraseña"
+                            required>
+
+                    </div>
+
+                    <div class="d-grid">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-lg">
+
+                            Ingresar
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+
+                    <small class="text-muted">
+                        Tribunal Supremo Electoral - VoteChain
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

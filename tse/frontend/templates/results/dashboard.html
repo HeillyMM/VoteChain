@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}
+Resultados Electorales
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <h2 class="fw-bold">
+        Resultados Electorales
+    </h2>
+
+    <p class="text-muted">
+        Resultados preliminares de la elección.
+    </p>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-5">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <table class="table table-hover">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Candidato</th>
+                            <th>Votos</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Jorge Tuto Quiroga</td>
+                            <td>250</td>
+                        </tr>
+
+                        <tr>
+                            <td>Rodrigo Paz</td>
+                            <td>320</td>
+                        </tr>
+
+                        <tr>
+                            <td>Samuel Doria Medina</td>
+                            <td>180</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-7">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <canvas id="graficoResultados"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx =
+document.getElementById('graficoResultados');
+
+new Chart(ctx, {
+
+    type: 'bar',
+
+    data: {
+
+        labels: [
+
+            'Jorge Tuto Quiroga',
+            'Rodrigo Paz',
+            'Samuel Doria Medina'
+
+        ],
+
+        datasets: [{
+
+            label: 'Cantidad de Votos',
+
+            data: [
+
+                250,
+                320,
+                180
+
+            ]
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+
+            legend: {
+                display: true
+            }
+
+        }
+
+    }
+
+});
+
+</script>
+
+{% endblock %}
