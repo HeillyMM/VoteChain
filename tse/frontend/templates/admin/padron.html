@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}
+Padrón Electoral
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="fw-bold">
+            Padrón Electoral
+        </h2>
+
+        <p class="text-muted">
+            Ciudadanos habilitados para participar en el proceso electoral.
+        </p>
+    </div>
+
+    <button class="btn btn-primary">
+        Actualizar desde SEGIP
+    </button>
+
+</div>
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-md-5">
+
+                <input
+                    type="text"
+                    id="buscar"
+                    class="form-control"
+                    placeholder="Buscar por CI o nombre...">
+
+            </div>
+
+            <div class="col-md-3">
+
+                <select
+                    id="filtroEstado"
+                    class="form-select">
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+                    <option value="Habilitado">
+                        Habilitado
+                    </option>
+
+                    <option value="Inhabilitado">
+                        Inhabilitado
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-4 text-end">
+
+                <span class="badge bg-primary fs-6">
+                    Total registros:
+                    <span id="contador">3</span>
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-dark">
+
+                <tr>
+                    <th>CI</th>
+                    <th>Nombre Completo</th>
+                    <th>Departamento</th>
+                    <th>Estado</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="tablaPadron">
+
+                <tr>
+                    <td>1234567 LP</td>
+                    <td>Carlos Quispe Mamani</td>
+                    <td>La Paz</td>
+                    <td>
+                        <span class="badge bg-success">
+                            Habilitado
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>2345678 CB</td>
+                    <td>María Flores Choque</td>
+                    <td>Cochabamba</td>
+                    <td>
+                        <span class="badge bg-success">
+                            Habilitado
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>3456789 SC</td>
+                    <td>Juan Pérez Rojas</td>
+                    <td>Santa Cruz</td>
+                    <td>
+                        <span class="badge bg-danger">
+                            Inhabilitado
+                        </span>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+const buscador = document.getElementById("buscar");
+const filtroEstado = document.getElementById("filtroEstado");
+const filas = document.querySelectorAll("#tablaPadron tr");
+const contador = document.getElementById("contador");
+
+function filtrarTabla() {
+
+    let visibles = 0;
+
+    filas.forEach(fila => {
+
+        const texto = fila.textContent.toLowerCase();
+
+        const estado =
+            fila.cells[3].innerText.trim();
+
+        const busqueda =
+            buscador.value.toLowerCase();
+
+        const coincideTexto =
+            texto.includes(busqueda);
+
+        const coincideEstado =
+            filtroEstado.value === "" ||
+            estado.includes(filtroEstado.value);
+
+        if (coincideTexto && coincideEstado) {
+
+            fila.style.display = "";
+            visibles++;
+
+        } else {
+
+            fila.style.display = "none";
+
+        }
+
+    });
+
+    contador.innerText = visibles;
+}
+
+buscador.addEventListener(
+    "keyup",
+    filtrarTabla
+);
+
+filtroEstado.addEventListener(
+    "change",
+    filtrarTabla
+);
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}
+Panel Administrador
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <h1 class="fw-bold">
+        Panel de Administración
+    </h1>
+
+    <p class="text-muted">
+        Sistema de Votación Electrónica basado en Blockchain
+    </p>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-3 col-md-6">
+
+        <div class="card h-100 shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h1>🗳️</h1>
+
+                <h5 class="card-title">
+                    Elecciones
+                </h5>
+
+                <p class="text-muted">
+                    Gestionar procesos electorales.
+                </p>
+
+                <a href="/eleciones"
+                   class="btn btn-primary w-100">
+
+                    Gestionar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+
+        <div class="card h-100 shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h1>👤</h1>
+
+                <h5 class="card-title">
+                    Candidatos
+                </h5>
+
+                <p class="text-muted">
+                    Registrar y administrar candidatos.
+                </p>
+
+                <a href="/candidatos"
+                   class="btn btn-success w-100">
+
+                    Gestionar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+
+        <div class="card h-100 shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h1>📋</h1>
+
+                <h5 class="card-title">
+                    Padrón Electoral
+                </h5>
+
+                <p class="text-muted">
+                    Consultar ciudadanos habilitados.
+                </p>
+
+                <a href="/padron"
+                   class="btn btn-warning w-100">
+
+                    Gestionar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+
+        <div class="card h-100 shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h1>📊</h1>
+
+                <h5 class="card-title">
+                    Resultados
+                </h5>
+
+                <p class="text-muted">
+                    Visualizar estadísticas electorales.
+                </p>
+
+                <a href="/resultados"
+                   class="btn btn-info w-100">
+
+                    Ver Resultados
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="col-lg-3 col-md-6">
+
+    <div class="card h-100 shadow-sm">
+
+        <div class="card-body text-center">
+
+            <h1>⛓️</h1>
+
+            <h5 class="card-title">
+                Blockchain
+            </h5>
+
+            <p class="text-muted">
+                Consultar bloques registrados.
+            </p>
+
+            <a href="/blockchain"
+               class="btn btn-dark w-100">
+
+                Explorar
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row mt-5">
+
+    <div class="col-md-4">
+
+        <div class="card text-center">
+
+            <div class="card-body">
+
+                <h2>12</h2>
+
+                <p class="text-muted">
+                    Elecciones Registradas
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card text-center">
+
+            <div class="card-body">
+
+                <h2>45</h2>
+
+                <p class="text-muted">
+                    Candidatos
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card text-center">
+
+            <div class="card-body">
+
+                <h2>1,250</h2>
+
+                <p class="text-muted">
+                    Ciudadanos Registrados
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

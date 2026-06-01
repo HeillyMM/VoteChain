@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}
+Panel Operador Electoral
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <h1 class="fw-bold">
+        Panel del Operador Electoral
+    </h1>
+
+    <p class="text-muted">
+        Gestión y verificación de ciudadanos habilitados para participar en el proceso electoral.
+    </p>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-4">
+
+        <div class="card h-100 text-center shadow-sm">
+
+            <div class="card-body">
+
+                <h1>🪪</h1>
+
+                <h5 class="card-title">
+                    Verificar Ciudadano
+                </h5>
+
+                <p class="text-muted">
+                    Consultar la información de un ciudadano mediante su cédula de identidad.
+                </p>
+
+                <a href="/operador/verificar"
+                   class="btn btn-primary w-100">
+
+                    Verificar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="card h-100 text-center shadow-sm">
+
+            <div class="card-body">
+
+                <h1>👥</h1>
+
+                <h5 class="card-title">
+                    Padrón Electoral
+                </h5>
+
+                <p class="text-muted">
+                    Consultar el listado de ciudadanos registrados en el sistema.
+                </p>
+
+                <a href="/operador/ciudadanos"
+                   class="btn btn-success w-100">
+
+                    Consultar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="card h-100 text-center shadow-sm">
+
+            <div class="card-body">
+
+                <h1>✅</h1>
+
+                <h5 class="card-title">
+                    Ciudadanos Habilitados
+                </h5>
+
+                <p class="text-muted">
+                    Visualizar los ciudadanos que se encuentran habilitados para votar.
+                </p>
+
+                <a href="/operador/habilitados"
+                   class="btn btn-warning w-100">
+
+                    Consultar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row mt-5">
+
+    <div class="col-md-4">
+
+        <div class="card text-center">
+
+            <div class="card-body">
+
+                <h2>1,250</h2>
+
+                <p class="text-muted">
+                    Ciudadanos Registrados
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card text-center">
+
+            <div class="card-body">
+
+                <h2>1,180</h2>
+
+                <p class="text-muted">
+                    Ciudadanos Habilitados
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card text-center">
+
+            <div class="card-body">
+
+                <h2>70</h2>
+
+                <p class="text-muted">
+                    Ciudadanos Inhabilitados
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

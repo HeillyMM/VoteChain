@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ciudadanos Registrados
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            Ciudadanos Registrados
+        </h2>
+
+        <p class="text-muted">
+            Consulta general del padrón electoral.
+        </p>
+
+    </div>
+
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <input type="text"
+               class="form-control mb-3"
+               placeholder="Buscar por CI o nombre">
+
+        <table class="table table-hover">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>CI</th>
+                    <th>Nombre</th>
+                    <th>Departamento</th>
+                    <th>Estado</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>1234567 LP</td>
+                    <td>Carlos Quispe Mamani</td>
+                    <td>La Paz</td>
+                    <td>
+                        <span class="badge bg-success">
+                            Habilitado
+                        </span>
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <td>2345678 CB</td>
+                    <td>María Flores Choque</td>
+                    <td>Cochabamba</td>
+                    <td>
+                        <span class="badge bg-success">
+                            Habilitado
+                        </span>
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
