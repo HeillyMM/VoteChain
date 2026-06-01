@@ -18,25 +18,25 @@ Panel Administrador
 
 </div>
 
+<!-- CARDS PRINCIPALES -->
 <div class="row g-4">
 
+    <!-- ELECCIONES -->
     <div class="col-lg-3 col-md-6">
 
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm border-0">
 
-            <div class="card-body text-center">
+            <div class="card-body">
 
-                <h1>🗳️</h1>
-
-                <h5 class="card-title">
+                <h5 class="fw-bold">
                     Elecciones
                 </h5>
 
-                <p class="text-muted">
-                    Gestionar procesos electorales.
+                <p class="text-muted small">
+                    Gestión de procesos electorales.
                 </p>
 
-                <a href="/eleciones"
+                <a href="{{url_for('bp_eleccion.index')}}"
                    class="btn btn-primary w-100">
 
                     Gestionar
@@ -49,23 +49,22 @@ Panel Administrador
 
     </div>
 
+    <!-- CANDIDATOS -->
     <div class="col-lg-3 col-md-6">
 
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm border-0">
 
-            <div class="card-body text-center">
+            <div class="card-body">
 
-                <h1>👤</h1>
-
-                <h5 class="card-title">
+                <h5 class="fw-bold">
                     Candidatos
                 </h5>
 
-                <p class="text-muted">
-                    Registrar y administrar candidatos.
+                <p class="text-muted small">
+                    Registro y administración de candidatos.
                 </p>
 
-                <a href="/candidatos"
+                <a href="{{url_for('bp_candidato.index')}}"
                    class="btn btn-success w-100">
 
                     Gestionar
@@ -78,23 +77,22 @@ Panel Administrador
 
     </div>
 
+    <!-- PADRÓN -->
     <div class="col-lg-3 col-md-6">
 
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm border-0">
 
-            <div class="card-body text-center">
+            <div class="card-body">
 
-                <h1>📋</h1>
-
-                <h5 class="card-title">
+                <h5 class="fw-bold">
                     Padrón Electoral
                 </h5>
 
-                <p class="text-muted">
-                    Consultar ciudadanos habilitados.
+                <p class="text-muted small">
+                    Ciudadanos habilitados para votar.
                 </p>
 
-                <a href="/padron"
+                <a href="{{url_for('bp_padron.index')}}"
                    class="btn btn-warning w-100">
 
                     Gestionar
@@ -107,26 +105,25 @@ Panel Administrador
 
     </div>
 
+    <!-- RESULTADOS -->
     <div class="col-lg-3 col-md-6">
 
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm border-0">
 
-            <div class="card-body text-center">
+            <div class="card-body">
 
-                <h1>📊</h1>
-
-                <h5 class="card-title">
+                <h5 class="fw-bold">
                     Resultados
                 </h5>
 
-                <p class="text-muted">
-                    Visualizar estadísticas electorales.
+                <p class="text-muted small">
+                    Estadísticas del proceso electoral.
                 </p>
 
                 <a href="/resultados"
-                   class="btn btn-info w-100">
+                   class="btn btn-info w-100 text-white">
 
-                    Ver Resultados
+                    Ver
 
                 </a>
 
@@ -137,28 +134,33 @@ Panel Administrador
     </div>
 
 </div>
-<div class="col-lg-3 col-md-6">
 
-    <div class="card h-100 shadow-sm">
+<!-- SEGUNDA FILA -->
+<div class="row g-4 mt-1">
 
-        <div class="card-body text-center">
+    <!-- BLOCKCHAIN -->
+    <div class="col-lg-3 col-md-6">
 
-            <h1>⛓️</h1>
+        <div class="card h-100 shadow-sm border-0">
 
-            <h5 class="card-title">
-                Blockchain
-            </h5>
+            <div class="card-body">
 
-            <p class="text-muted">
-                Consultar bloques registrados.
-            </p>
+                <h5 class="fw-bold">
+                    Blockchain
+                </h5>
 
-            <a href="/blockchain"
-               class="btn btn-dark w-100">
+                <p class="text-muted small">
+                    Registro inmutable de votos.
+                </p>
 
-                Explorar
+                <a href="/blockchain"
+                   class="btn btn-dark w-100">
 
-            </a>
+                    Explorar
+
+                </a>
+
+            </div>
 
         </div>
 
@@ -166,19 +168,17 @@ Panel Administrador
 
 </div>
 
-<div class="row mt-5">
+<!-- ESTADÍSTICAS -->
+<div class="row mt-5 g-4">
 
     <div class="col-md-4">
 
-        <div class="card text-center">
+        <div class="card border-0 shadow-sm">
 
-            <div class="card-body">
+            <div class="card-body text-center">
 
-                <h2>12</h2>
-
-                <p class="text-muted">
-                    Elecciones Registradas
-                </p>
+                <h2 class="fw-bold mb-1">12</h2>
+                <p class="text-muted mb-0">Elecciones</p>
 
             </div>
 
@@ -188,15 +188,12 @@ Panel Administrador
 
     <div class="col-md-4">
 
-        <div class="card text-center">
+        <div class="card border-0 shadow-sm">
 
-            <div class="card-body">
+            <div class="card-body text-center">
 
-                <h2>45</h2>
-
-                <p class="text-muted">
-                    Candidatos
-                </p>
+                <h2 class="fw-bold mb-1">45</h2>
+                <p class="text-muted mb-0">Candidatos</p>
 
             </div>
 
@@ -206,15 +203,12 @@ Panel Administrador
 
     <div class="col-md-4">
 
-        <div class="card text-center">
+        <div class="card border-0 shadow-sm">
 
-            <div class="card-body">
+            <div class="card-body text-center">
 
-                <h2>1,250</h2>
-
-                <p class="text-muted">
-                    Ciudadanos Registrados
-                </p>
+                <h2 class="fw-bold mb-1">1,250</h2>
+                <p class="text-muted mb-0">Ciudadanos</p>
 
             </div>
 

@@ -8,67 +8,75 @@
 
     <div>
         <h2 class="fw-bold">Gestión de Elecciones</h2>
-        <p class="text-muted">
-            Administración de procesos electorales.
-        </p>
+        <p class="text-muted">Administración de procesos electorales</p>
     </div>
 
-    <button class="btn btn-primary">
+    <a href="{{ url_for('bp_eleccion.create') }}" class="btn btn-primary">
         Nueva Elección
-    </button>
+    </a>
 
 </div>
 
 <div class="card">
-
     <div class="card-body">
 
         <table class="table table-hover">
 
             <thead class="table-dark">
-
                 <tr>
                     <th>ID</th>
-                    <th>Nombre</th>
+                    <th>Código</th>
+                    <th>Título</th>
+                    <th>Tipo</th>
                     <th>Estado</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
                     <th>Acciones</th>
                 </tr>
-
             </thead>
 
             <tbody>
 
+                {% for e in eleccions %}
+
                 <tr>
-
-                    <td>1</td>
-                    <td>Elecciones Generales 2026</td>
+                    <td>{{ e.id }}</td>
+                    <td>{{ e.codigo }}</td>
+                    <td>{{ e.titulo }}</td>
+                    <td>{{ e.tipo }}</td>
 
                     <td>
-                        <span class="badge bg-success">
-                            Activa
-                        </span>
+                        {% if e.estado == 'ACTIVA' %}
+                            <span class="badge bg-success">{{ e.estado }}</span>
+                        {% elif e.estado == 'CONFIGURACION' %}
+                            <span class="badge bg-warning text-dark">{{ e.estado }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ e.estado }}</span>
+                        {% endif %}
                     </td>
 
-                    <td>
+                    <td>{{ e.fecha_inicio }}</td>
+                    <td>{{ e.fecha_fin or '-' }}</td>
 
-                        <button class="btn btn-warning btn-sm">
+                    <td>
+                        <a href="#" class="btn btn-warning btn-sm">
                             Editar
-                        </button>
+                        </a>
 
-                        <button class="btn btn-danger btn-sm">
+                        <a href="{{ url_for('bp_eleccion.close', id=e.id) }}"
+                           class="btn btn-danger btn-sm">
                             Cerrar
-                        </button>
-
+                        </a>
                     </td>
-
                 </tr>
+
+                {% endfor %}
 
             </tbody>
 
         </table>
 
     </div>
-
 </div>
 
 {% endblock %}

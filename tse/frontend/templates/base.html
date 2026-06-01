@@ -22,18 +22,15 @@
 
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 
-    <!-- Barra de Navegación -->
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
 
         <div class="container">
 
-            <a class="navbar-brand fw-bold"
-               href="/">
-
+            <a class="navbar-brand fw-bold" href="/">
                 🗳️ VoteChain
-
             </a>
 
             <button class="navbar-toggler"
@@ -45,39 +42,28 @@
 
             </button>
 
-            <div class="collapse navbar-collapse"
-                 id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarNav">
 
                 <ul class="navbar-nav ms-auto">
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin">
-                            Administrador
-                        </a>
+                        <a class="nav-link" href="/admin">Administrador</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/votante">
-                            Votante
-                        </a>
+                        <a class="nav-link" href="/votante">Votante</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/resultados">
-                            Resultados
-                        </a>
+                        <a class="nav-link" href="/resultados">Resultados</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/blockchain">
-                            Blockchain
-                        </a>
+                        <a class="nav-link" href="/blockchain">Blockchain</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/auditoria">
-                            Auditoría
-                        </a>
+                        <a class="nav-link" href="/auditoria">Auditoría</a>
                     </li>
 
                 </ul>
@@ -88,10 +74,10 @@
 
     </nav>
 
-    <!-- Contenedor Principal -->
-    <div class="container mt-4">
+    <!-- CONTENIDO -->
+    <main class="container mt-4 flex-grow-1">
 
-        <!-- Mensajes Flash -->
+        <!-- FLASH MESSAGES -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
 
@@ -114,14 +100,13 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Contenido -->
         {% block content %}
         {% endblock %}
 
-    </div>
+    </main>
 
-    <!-- Pie de Página -->
-    <footer class="bg-dark text-white text-center py-3 mt-5">
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
 
         <div class="container">
 

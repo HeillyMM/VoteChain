@@ -8,180 +8,108 @@ Registrar Candidato
 
 <div class="row justify-content-center">
 
-```
 <div class="col-lg-8">
 
     <div class="card shadow-sm">
 
         <div class="card-header bg-primary text-white">
-
-            <h3 class="mb-0">
-                Registro de Candidato
-            </h3>
-
+            <h3 class="mb-0">Registro de Candidato</h3>
         </div>
 
         <div class="card-body">
 
-            <form>
+            <form action="{{ url_for('bp_candidato.create') }}"
+                  method="POST"
+                  enctype="multipart/form-data">
 
                 <div class="row">
 
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label">
-                            Nombre Completo
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Ingrese el nombre completo">
-
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Nombres</label>
+                        <input type="text" name="nombres" class="form-control" required>
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Apellido Paterno</label>
+                        <input type="text" name="apellido_paterno" class="form-control" required>
+                    </div>
 
-                        <label class="form-label">
-                            Cédula de Identidad
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Ej. 1234567 LP">
-
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Apellido Materno</label>
+                        <input type="text" name="apellido_materno" class="form-control">
                     </div>
 
                 </div>
 
                 <div class="row">
 
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label">
-                            Partido Político
-                        </label>
-
-                        <select class="form-select">
-
-                            <option selected>
-                                Seleccione un partido
-                            </option>
-
-                            <option>
-                                Libre
-                            </option>
-
-                            <option>
-                                Partido Demócrata Cristiano
-                            </option>
-
-                            <option>
-                                Unidad Nacional
-                            </option>
-
-                        </select>
-
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Número Lista</label>
+                        <input type="number" name="numero_lista" class="form-control" required>
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Sigla Partido</label>
+                        <input type="text" name="sigla_partido" class="form-control" required>
+                    </div>
 
-                        <label class="form-label">
-                            Departamento
-                        </label>
-
-                        <select class="form-select">
-
-                            <option>La Paz</option>
-                            <option>Cochabamba</option>
-                            <option>Santa Cruz</option>
-                            <option>Oruro</option>
-                            <option>Potosí</option>
-                            <option>Tarija</option>
-                            <option>Chuquisaca</option>
-                            <option>Beni</option>
-                            <option>Pando</option>
-
-                        </select>
-
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Nombre Partido</label>
+                        <input type="text" name="nombre_partido" class="form-control">
                     </div>
 
                 </div>
+                
+                <div class="mb-3">
+                <label class="form-label">Elección</label>
+
+                <select name="eleccion_id" class="form-select" required>
+                    <option value="">Seleccione una elección</option>
+
+                    {% for e in elecciones %}
+                    <option value="{{ e.id }}">
+                        {{ e.titulo }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
 
                 <div class="mb-3">
+                    <label class="form-label">Propuesta Electoral</label>
+                    <textarea name="propuesta_breve"
+                              class="form-control"
+                              rows="4"></textarea>
+                </div>
 
-                    <label class="form-label">
-                        Fotografía del Candidato
-                    </label>
+                <div class="row">
 
-                    <input
-                        type="file"
-                        class="form-control">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Foto Candidato</label>
+                        <input type="file" name="foto_candidato" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Logo Partido</label>
+                        <input type="file" name="logo_partido" class="form-control">
+                    </div>
 
                 </div>
 
                 <div class="mb-3">
-
-                    <label class="form-label">
-                        Logo del Partido
-                    </label>
-
-                    <input
-                        type="file"
-                        class="form-control">
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Propuesta Electoral
-                    </label>
-
-                    <textarea
-                        class="form-control"
-                        rows="5"
-                        placeholder="Ingrese la propuesta electoral">
-                    </textarea>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Estado
-                    </label>
-
-                    <select class="form-select">
-
-                        <option selected>
-                            Activo
-                        </option>
-
-                        <option>
-                            Inactivo
-                        </option>
-
-                    </select>
-
+                    <label class="form-label">Color Partido</label>
+                    <input type="color" name="color_partido" class="form-control form-control-color">
                 </div>
 
                 <div class="text-center mt-4">
 
-                    <button
-                        type="submit"
-                        class="btn btn-success btn-lg">
-
+                    <button type="submit" class="btn btn-success btn-lg">
                         Guardar Candidato
-
                     </button>
 
-                    <a href="/candidatos"
+                    <a href="{{ url_for('bp_candidato.index') }}"
                        class="btn btn-secondary btn-lg">
-
                         Cancelar
-
                     </a>
 
                 </div>
@@ -193,7 +121,6 @@ Registrar Candidato
     </div>
 
 </div>
-```
 
 </div>
 

@@ -6,6 +6,10 @@ from email.utils import parsedate_to_datetime
 class PadronService:
 
     @staticmethod
+    def listar():
+        return PadronElectoral.query.all()
+
+    @staticmethod
     def construir_padron():
 
         ciudadanos = SegipService.obtener_ciudadanos()
