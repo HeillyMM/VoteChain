@@ -216,8 +216,8 @@ CREATE TABLE IF NOT EXISTS padron_electoral (
     fecha_nacimiento      DATE         NOT NULL,
     sexo                  ENUM('M','F') NOT NULL,
 
-    recinto_id            INT          NOT NULL,
-    mesa_numero           INT          NOT NULL,
+    recinto_id            INT          ,
+    mesa_numero           INT          ,
 
     habilitado            TINYINT(1)   NOT NULL DEFAULT 1,
     motivo_inhabilitacion VARCHAR(200) NULL,

@@ -1,17 +1,33 @@
 services:
+
+  tse:
+    build: ./tse/backend
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: mysql+pymysql://root:root123@mariadb/tse_db
+      SEGIP_URL: http://segip:5001
+    depends_on:
+      - mariadb
+      - segip
+
+  segip:
+    build: ./segip
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URL: mysql+pymysql://root:root123@mariadb/segip_db
+    depends_on:
+      - mariadb
+
   mariadb:
     image: mariadb:11
-
     container_name: voting_mariadb
-
     restart: unless-stopped
-
     environment:
       MYSQL_ROOT_PASSWORD: root123
-
     ports:
       - "3306:3306"
-
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./sivel.sql:/docker-entrypoint-initdb.d/sivel.sql
