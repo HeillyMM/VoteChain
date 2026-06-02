@@ -22,12 +22,13 @@ Verificar Ciudadano
                     Ingrese el número de cédula de identidad para verificar la información del ciudadano.
                 </p>
 
-                <form>
+                <form action="{{url_for('bp_padron.verificar')}}" method="POST">
 
                     <div class="input-group mb-4">
 
                         <input type="text"
                                class="form-control"
+                               name="ci"
                                placeholder="Ejemplo: 1234567 LP">
 
                         <button class="btn btn-primary">
@@ -42,33 +43,43 @@ Verificar Ciudadano
 
                 <h5>Resultado de la búsqueda</h5>
 
-                <table class="table table-bordered mt-3">
+                    {% if ciudadano %}
 
-                    <tr>
-                        <th>CI</th>
-                        <td>1234567 LP</td>
-                    </tr>
+                    <table class="table table-bordered mt-3">
 
-                    <tr>
-                        <th>Nombre</th>
-                        <td>Carlos Quispe Mamani</td>
-                    </tr>
+                        <tr>
+                            <th>CI</th>
+                            <td>{{ ciudadano.ci }}</td>
+                        </tr>
 
-                    <tr>
-                        <th>Departamento</th>
-                        <td>La Paz</td>
-                    </tr>
+                        <tr>
+                            <th>Nombre</th>
+                            <td>{{ ciudadano.nombres }} {{ ciudadano.apellido_paterno }} {{ ciudadano.apellido_materno }}</td>
+                        </tr>
 
-                    <tr>
-                        <th>Estado</th>
-                        <td>
-                            <span class="badge bg-success">
-                                Habilitado
-                            </span>
-                        </td>
-                    </tr>
+                        <tr>
+                            <th>Departamento</th>
+                            <td>{{ ciudadano.departamento }}</td>
+                        </tr>
 
-                </table>
+                        <tr>
+                            <th>Estado</th>
+                            <td>
+                                <span class="badge bg-success">
+                                    Habilitado
+                                </span>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    {% elif buscado %}
+
+                    <div class="alert alert-danger mt-3">
+                        No se encontró el ciudadano con CI: {{ buscado }}
+                    </div>
+
+                    {% endif %}
 
             </div>
 

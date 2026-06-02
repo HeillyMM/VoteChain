@@ -25,6 +25,6 @@ def login():
     if user.rol_id == 1:
         return render_template("admin/dashboard.html")
     elif user.rol_id == 2:
-        return redirect("/operador")
+        return render_template("operator/dashboard.html")
     else:
         return redirect("/auditor")

@@ -9,15 +9,13 @@ Ciudadanos Registrados
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
-
         <h2 class="fw-bold">
             Ciudadanos Registrados
         </h2>
 
         <p class="text-muted">
-            Consulta general del padrón electoral.
+            Solo ciudadanos habilitados asignados a su mesa.
         </p>
-
     </div>
 
 </div>
@@ -33,45 +31,50 @@ Ciudadanos Registrados
         <table class="table table-hover">
 
             <thead class="table-dark">
-
                 <tr>
-
                     <th>CI</th>
-                    <th>Nombre</th>
-                    <th>Departamento</th>
+                    <th>Nombre Completo</th>
+                    <th>Recinto</th>
+                    <th>Mesa</th>
                     <th>Estado</th>
-
                 </tr>
-
             </thead>
 
             <tbody>
 
-                <tr>
-
-                    <td>1234567 LP</td>
-                    <td>Carlos Quispe Mamani</td>
-                    <td>La Paz</td>
-                    <td>
-                        <span class="badge bg-success">
-                            Habilitado
-                        </span>
-                    </td>
-
-                </tr>
+                {% for p in padron %}
 
                 <tr>
+                    <td>{{ p.ci }}</td>
 
-                    <td>2345678 CB</td>
-                    <td>María Flores Choque</td>
-                    <td>Cochabamba</td>
                     <td>
-                        <span class="badge bg-success">
-                            Habilitado
-                        </span>
+                        {{ p.nombres }}
+                        {{ p.apellido_paterno }}
+                        {{ p.apellido_materno or "" }}
                     </td>
 
+                    <td>{{ p.recinto.nombre if p.recinto else "N/A" }}</td>
+
+                    <td>{{ p.mesa_numero }}</td>
+
+                    <td>
+                        {% if p.habilitado %}
+                        <span class="badge bg-success">Habilitado</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inhabilitado</span>
+                        {% endif %}
+                    </td>
                 </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        No hay ciudadanos asignados
+                    </td>
+                </tr>
+
+                {% endfor %}
 
             </tbody>
 
