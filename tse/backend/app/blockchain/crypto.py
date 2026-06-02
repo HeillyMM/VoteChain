@@ -116,7 +116,7 @@ class VoteCipher:
     
     
     #firma digital ECDSA por transaccion
-    class TransactionSigner:
+class TransactionSigner:
         #firma por cada transaccion de voto con ECDSA sobre la curva
         # secp256k1 (igual que un Bitcoin)
         # la firma garantiza que la transaccion no fue alterada

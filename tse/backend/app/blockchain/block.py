@@ -75,7 +75,7 @@ class Block():
         while len(hashes) > 1:
             # si hay una cantidad impar se duplica el ultimo hash
             
-            if len (hashes) % 2 == 0:
+            if len (hashes) % 2 != 0:
                 hashes.append(hashes[-1])
                 
             # combinar hashes de dos en dos

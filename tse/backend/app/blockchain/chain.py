@@ -57,7 +57,7 @@ class Blockchain:
         
         if os.path.exists(self.filepath):
             try:
-                with open(self.filepath, 'r', encoding='utd-8') as f:
+                with open(self.filepath, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 chain = [Block.from_dict(b) for b in data]
                 print(
