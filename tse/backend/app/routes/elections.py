@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from app.services.election_service import EleccionService
 from datetime import datetime
+from app.blockchain.crypto import generar_par_claves_eleccion
 
 bp_eleccion = Blueprint("bp_eleccion", __name__, url_prefix="/elecciones")
 
@@ -27,6 +28,7 @@ def create():
 
     created_by = session.get("user_id")
 
+    clave_publica, clave_privada = generar_par_claves_eleccion()
     EleccionService.crear(
         codigo,
         titulo,
@@ -34,7 +36,9 @@ def create():
         tipo,
         fecha_inicio,
         fecha_fin,
-        created_by
+        created_by,
+        clave_publica,
+        clave_privada
     )
 
     return redirect(url_for("bp_eleccion.index"))

@@ -1,6 +1,13 @@
 from app.extensions import db
 from app.models.election import Eleccion
+from app.models.conteo import Conteo
+from app.models.candidate import Candidato
 from datetime import datetime
+
+from app.blockchain.crypto import (
+    generar_par_claves_eleccion, cargar_clave_privada, VoteCipher
+)
+from app.blockchain.chain import Blockchain
 
 class EleccionService:
 
@@ -15,6 +22,8 @@ class EleccionService:
     @staticmethod
     def crear(codigo, titulo, descripcion, tipo, fecha_inicio, fecha_fin, created_by):
 
+        #claves RSA para la eleccion
+        clave_publica, clave_privada = generar_par_claves_eleccion()
         eleccion = Eleccion(
             codigo=codigo,
             titulo=titulo,
