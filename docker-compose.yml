@@ -9,6 +9,9 @@ services:
     environment:
       DATABASE_URL: mysql+pymysql://root:root123@mariadb/tse_db
       SEGIP_URL: http://segip:5001
+    volumes:
+    - ./tse/backend:/app/backend
+    - ./tse/frontend:/app/frontend
     depends_on:
       - mariadb
       - segip
@@ -19,6 +22,8 @@ services:
       - "5001:5001"
     environment:
       DATABASE_URL: mysql+pymysql://root:root123@mariadb/segip_db
+    volumes:
+    - ./segip:/app
     depends_on:
       - mariadb
 

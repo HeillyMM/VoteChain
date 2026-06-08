@@ -22,7 +22,7 @@ Verificar Ciudadano
                     Ingrese el número de cédula de identidad para verificar la información del ciudadano.
                 </p>
 
-                <form action="{{url_for('bp_padron.verificar')}}" method="POST">
+                <form action="{{url_for('bp_padron.verificar',eleccion_id=eleccion_id)}}" method="POST">
 
                     <div class="input-group mb-4">
 
@@ -59,7 +59,17 @@ Verificar Ciudadano
 
                         <tr>
                             <th>Departamento</th>
-                            <td>{{ ciudadano.departamento }}</td>
+                            <td>{{ padron.departamento.nombre }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Recinto</th>
+                            <td>{{ padron.recinto.nombre }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Mesa</th>
+                            <td>{{ padron.mesa_numero }}</td>
                         </tr>
 
                         <tr>

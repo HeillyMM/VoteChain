@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email          VARCHAR(120) NOT NULL,
     password_hash  VARCHAR(255) NOT NULL,
     rol_id         INT          NOT NULL,
+    recinto_id     INT          ,
     activo         TINYINT(1)   NOT NULL DEFAULT 1,
     created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -166,6 +167,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     INDEX idx_rol (rol_id),
     CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id)
         REFERENCES roles (id)
+    CONSTRAINT fk_usuario_recinto 
+    FOREIGN KEY (recinto_id) REFERENCES recintos(id);
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Recintos ─────────────────────────────────────────────────
@@ -196,72 +199,6 @@ CREATE TABLE IF NOT EXISTS kioscos (
     UNIQUE KEY uq_kiosco_recinto (recinto_id, nombre),
     CONSTRAINT fk_kiosco_recinto FOREIGN KEY (recinto_id)
         REFERENCES recintos (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ── Padrón Electoral ─────────────────────────────────────────
--- Construido consultando la API del SEGIP antes de la elección.
--- El campo CI es dato copiado del SEGIP, NO es FK hacia segip_db.
--- Solo registra SI votó, NUNCA A QUIÉN votó.
-CREATE TABLE IF NOT EXISTS padron_electoral (
-    id                    INT          NOT NULL AUTO_INCREMENT,
-
-    -- CI copiada del SEGIP al construir el padrón.
-    -- Es un dato, no una FK. El SEGIP y el TSE son independientes.
-    ci                    VARCHAR(12)  NOT NULL,
-    complemento           VARCHAR(4)   NULL,
-
-    nombres               VARCHAR(100) NOT NULL,
-    apellido_paterno      VARCHAR(80)  NOT NULL,
-    apellido_materno      VARCHAR(80)  NULL,
-    fecha_nacimiento      DATE         NOT NULL,
-    sexo                  ENUM('M','F') NOT NULL,
-
-    recinto_id            INT          ,
-    mesa_numero           INT          ,
-
-    habilitado            TINYINT(1)   NOT NULL DEFAULT 1,
-    motivo_inhabilitacion VARCHAR(200) NULL,
-
-    -- Sabe QUE votó, NUNCA A QUIÉN
-    ya_voto               TINYINT(1)   NOT NULL DEFAULT 0,
-    hora_voto             DATETIME     NULL,
-    habilitado_por        INT          NULL,
-
-    created_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-                                       ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    UNIQUE KEY uq_ci_padron (ci),
-    INDEX idx_ci_padron (ci),
-    INDEX idx_recinto_mesa (recinto_id, mesa_numero),
-    CONSTRAINT fk_padron_recinto  FOREIGN KEY (recinto_id)
-        REFERENCES recintos (id),
-    CONSTRAINT fk_padron_operador FOREIGN KEY (habilitado_por)
-        REFERENCES usuarios (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ── Sesiones de Kiosco ───────────────────────────────────────
--- Token de un solo uso con expiración de 5 minutos.
--- Se destruye en cuanto el voto es emitido.
-CREATE TABLE IF NOT EXISTS sesiones_kiosco (
-    id           INT         NOT NULL AUTO_INCREMENT,
-    operador_id  INT         NOT NULL,
-    padron_id    INT         NOT NULL,
-    kiosco_id    INT         NOT NULL,
-    token_hash   VARCHAR(64) NOT NULL,
-    estado       ENUM('PENDIENTE','ACTIVA','COMPLETADA','EXPIRADA')
-                             NOT NULL DEFAULT 'PENDIENTE',
-    expira_en    DATETIME    NOT NULL,
-    created_at   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    UNIQUE KEY uq_token (token_hash),
-    INDEX idx_estado_sesion (estado),
-    CONSTRAINT fk_sesion_operador FOREIGN KEY (operador_id)
-        REFERENCES usuarios (id),
-    CONSTRAINT fk_sesion_padron   FOREIGN KEY (padron_id)
-        REFERENCES padron_electoral (id),
-    CONSTRAINT fk_sesion_kiosco   FOREIGN KEY (kiosco_id)
-        REFERENCES kioscos (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Elecciones ───────────────────────────────────────────────
@@ -298,6 +235,80 @@ CREATE TABLE IF NOT EXISTS recintos_elecciones(
     CONSTRAINT fk_id_eleccion FOREIGN KEY (eleccion_id)
     REFERENCES elecciones (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;;
+
+
+
+-- ── Padrón Electoral ─────────────────────────────────────────
+-- Construido consultando la API del SEGIP antes de la elección.
+-- El campo CI es dato copiado del SEGIP, NO es FK hacia segip_db.
+-- Solo registra SI votó, NUNCA A QUIÉN votó.
+CREATE TABLE IF NOT EXISTS padron_electoral (
+    id                    INT          NOT NULL AUTO_INCREMENT,
+
+    -- CI copiada del SEGIP al construir el padrón.
+    -- Es un dato, no una FK. El SEGIP y el TSE son independientes.
+    ci                    VARCHAR(12)  NOT NULL,
+    complemento           VARCHAR(4)   NULL,
+
+    nombres               VARCHAR(100) NOT NULL,
+    apellido_paterno      VARCHAR(80)  NOT NULL,
+    apellido_materno      VARCHAR(80)  NULL,
+    fecha_nacimiento      DATE         NOT NULL,
+    sexo                  ENUM('M','F') NOT NULL,
+
+    recinto_id            INT,
+    mesa_numero           INT,
+
+    habilitado            TINYINT(1)   NOT NULL DEFAULT 1,
+    motivo_inhabilitacion VARCHAR(200) NULL,
+
+    -- Sabe QUE votó, NUNCA A QUIÉN
+    ya_voto               TINYINT(1)   NOT NULL DEFAULT 0,
+    departamento_id       TINYINT      NOT NULL,
+    eleccion_id           INT          NOT NULL,
+    hora_voto             DATETIME     NULL,
+    habilitado_por        INT          NULL,
+
+    created_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                       ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_ci_padron (ci),
+    INDEX idx_ci_padron (ci),
+    INDEX idx_recinto_mesa (recinto_id, mesa_numero),
+    CONSTRAINT fk_padron_recinto  FOREIGN KEY (recinto_id)
+        REFERENCES recintos (id),
+    CONSTRAINT fk_padron_departamento  FOREIGN KEY (departamento_id)
+        REFERENCES departamentos (id),
+    CONSTRAINT fk_padron_eleccion  FOREIGN KEY (eleccion_id)
+        REFERENCES elecciones (id),
+    CONSTRAINT fk_padron_operador FOREIGN KEY (habilitado_por)
+        REFERENCES usuarios (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── Sesiones de Kiosco ───────────────────────────────────────
+-- Token de un solo uso con expiración de 5 minutos.
+-- Se destruye en cuanto el voto es emitido.
+CREATE TABLE IF NOT EXISTS sesiones_kiosco (
+    id           INT         NOT NULL AUTO_INCREMENT,
+    operador_id  INT         NOT NULL,
+    padron_id    INT         NOT NULL,
+    kiosco_id    INT         NOT NULL,
+    token_hash   VARCHAR(64) NOT NULL,
+    estado       ENUM('PENDIENTE','ACTIVA','COMPLETADA','EXPIRADA')
+                             NOT NULL DEFAULT 'PENDIENTE',
+    expira_en    DATETIME    NOT NULL,
+    created_at   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_token (token_hash),
+    INDEX idx_estado_sesion (estado),
+    CONSTRAINT fk_sesion_operador FOREIGN KEY (operador_id)
+        REFERENCES usuarios (id),
+    CONSTRAINT fk_sesion_padron   FOREIGN KEY (padron_id)
+        REFERENCES padron_electoral (id),
+    CONSTRAINT fk_sesion_kiosco   FOREIGN KEY (kiosco_id)
+        REFERENCES kioscos (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Candidatos ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS candidatos (

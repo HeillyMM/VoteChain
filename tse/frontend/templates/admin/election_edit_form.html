@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Elección{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4">
+    Editar Elección
+</h2>
+
+<div class="card">
+
+    <div class="card-body">
+
+        <form action="{{ url_for('bp_eleccion.editar',id=eleccion.id) }}" method="POST">
+
+            <div class="mb-3">
+                <label class="form-label">Código</label>
+                <input type="text" name="codigo" class="form-control" value="{{eleccion.codigo}}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Título</label>
+                <input type="text" name="titulo" class="form-control" value="{{eleccion.titulo}}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea name="descripcion" class="form-control">{{eleccion.descripcion}}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tipo de Elección</label>
+                <select name="tipo" class="form-select" required>
+                    <option value="PRESIDENCIAL" {% if eleccion.tipo == "PRESIDENCIAL" %}{% endif %}>Presidencial</option>
+                    <option value="MUNICIPAL" {% if eleccion.tipo == "MUNICIPAL" %}{% endif %}>Municipal</option>
+                    <option value="DEPARTAMENTAL" {% if eleccion.tipo == "DEPARTAMENTAL" %}{% endif %}>Departamental</option>
+                    <option value="REFERENDUM" {% if eleccion.tipo == "REFERENDUM" %}{% endif %}>Referéndum</option>
+                    <option value="ASAMBLEA" {% if eleccion.tipo == "ASAMBLEA" %}{% endif %}>Asamblea</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha Inicio</label>
+                <input type="datetime-local" name="fecha_inicio" class="form-control" value="{{eleccion.fecha_inicio}}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha Fin</label>
+                <input type="datetime-local" name="fecha_fin" class="form-control" value="{{eleccion.fecha_fin}}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Estado de la Elección</label>
+                <select name="estado" class="form-select" required>
+                    <option value="CONFIGURACION" {% if eleccion.estado == "CONFIGURACION" %}selected{% endif %}>Confiuguracion</option>
+                    <option value="ACTIVA" {% if eleccion.estado == "ACTIVA" %}selected{% endif %} disabled>Activa</option>
+                    <option value="SUSPENDIDA" {% if eleccion.estado == "SUSPENDIDA" %}selected{% endif %}>Suspendida</option>
+                    <option value="CERRADA" {% if eleccion.estado == "CERRADA" %}selected{% endif %} disabled>Cerrada</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Guardar
+            </button>
+            <a href="{{url_for('bp_eleccion.dashboard',eleccion_id=eleccion.id)}}" class="btn btn-secondary">
+                cancelar
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

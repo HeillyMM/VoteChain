@@ -15,7 +15,7 @@ Gestión de Candidatos
         </p>
     </div>
 
-    <a href="{{ url_for('bp_candidato.create') }}"
+    <a href="{{ url_for('bp_candidato.create',eleccion_id=eleccion.id) }}"
        class="btn btn-primary">
         + Nuevo Candidato
     </a>
@@ -30,17 +30,16 @@ Gestión de Candidatos
 
         <div class="card shadow-sm h-100">
 
-            <img src="{{ candidato.foto_candidato or url_for('static', filename='img/default.png') }}"
+            <img src="{{ url_for('static', filename='img/candidatos/' + candidato.foto_candidato) }}"
                  class="card-img-top"
                  alt="Candidato">
 
             <div class="card-body text-center">
-
                 <h5 class="card-title fw-bold">
                     {{ candidato.nombres }} {{ candidato.apellido_paterno }}
                 </h5>
 
-                <img src="{{ candidato.logo_partido or url_for('static', filename='img/partidos/default.png') }}"
+                <img src="{{ url_for('static', filename='img/partidos/' + candidato.logo_partido) }}"
                      class="logo-partido mb-2"
                      alt="Partido">
 
@@ -56,7 +55,7 @@ Gestión de Candidatos
 
                 <div class="d-flex justify-content-center gap-2">
 
-                    <a href="#" class="btn btn-warning btn-sm">
+                    <a href="{{ url_for('bp_candidato.editar', eleccion_id=eleccion.id,id=candidato.id) }}" class="btn btn-warning btn-sm">
                         Editar
                     </a>
 

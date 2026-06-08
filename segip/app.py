@@ -27,7 +27,7 @@ def verificar_ci(ci):
         "nombres": ciudadano.nombres,
         "apellido_paterno": ciudadano.apellido_paterno,
         "apellido_materno": ciudadano.apellido_materno,
-        "departamento": ciudadano.departamento.nombre,
+        "departamento": ciudadano.departamento_id,
         "vivo": ciudadano.vivo
     }), 200
 
@@ -38,12 +38,15 @@ def get_ciudadanos():
     resultado = []
     for ciudadano in ciudadanos:
         resultado.append({
+        "valido": True,
         "ci": ciudadano.ci,
         "nombres": ciudadano.nombres,
         "apellido_paterno": ciudadano.apellido_paterno,
         "apellido_materno": ciudadano.apellido_materno,
+        "departamento_id": ciudadano.departamento_id,
         "fecha_nacimiento": ciudadano.fecha_nacimiento,
-        "sexo": ciudadano.sexo
+        "sexo":ciudadano.sexo,
+        "vivo": ciudadano.vivo
     })
 
     return jsonify(resultado),200

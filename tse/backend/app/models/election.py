@@ -20,3 +20,10 @@ class Eleccion(db.Model):
     updated_at = db.Column(db.DateTime,nullable=False,default=datetime.utcnow,onupdate=datetime.utcnow)
 
     creador = db.relationship("Usuario",backref="elecciones_creadas")
+    recintos = db.relationship("Recinto",secondary="recintos_elecciones",back_populates="elecciones")
+
+class RecintoEleccion(db.Model):
+    __tablename__ = "recintos_elecciones"
+
+    recinto_id = db.Column(db.Integer,db.ForeignKey("recintos.id"),primary_key=True)
+    eleccion_id = db.Column(db.Integer,db.ForeignKey("elecciones.id"),primary_key=True)

@@ -15,7 +15,7 @@ Padrón Electoral
         </p>
     </div>
 
-    <a href="{{ url_for('bp_padron.importar_padron') }}" class="btn btn-primary">
+    <a href="{{ url_for('bp_padron.importar_padron',id_eleccion=id_eleccion) }}" class="btn btn-primary">
         Actualizar desde SEGIP
     </a>
 

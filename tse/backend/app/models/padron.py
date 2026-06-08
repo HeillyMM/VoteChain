@@ -4,9 +4,10 @@ from datetime import datetime
 
 class PadronElectoral(db.Model):
     __tablename__ = "padron_electoral"
+    __table_args__ = (db.UniqueConstraint('ci', 'eleccion_id', name='uq_ci_eleccion'),)
 
     id = db.Column(db.Integer,primary_key=True)
-    ci = db.Column(db.String(12),nullable=False,unique=True)
+    ci = db.Column(db.String(12),nullable=False)
     complemento = db.Column(db.String(4))
     nombres = db.Column(db.String(100),nullable=False)
     apellido_paterno = db.Column(db.String(80),nullable=False)
@@ -20,13 +21,19 @@ class PadronElectoral(db.Model):
     ya_voto = db.Column(db.Boolean,nullable=False,default=0)
     hora_voto = db.Column(db.DateTime)
     habilitado_por = db.Column(db.Integer,db.ForeignKey('usuarios.id'))
+    eleccion_id = db.Column(db.Integer,db.ForeignKey('elecciones.id'),nullable=False)
+    departamento_id = db.Column(db.Integer,db.ForeignKey('departamentos.id'),nullable=False)
     created_at = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
     updated_at = db.Column(db.DateTime,nullable=False,default=datetime.utcnow,onupdate=datetime.utcnow)
 
+    #relacion eleccion
+    eleccion = db.relationship("Eleccion",backref="padrones")
+    #relacion departamento
+    departamento = db.relationship("Departamento",backref="padrones")
     #relacion recinto_id
     recinto = db.relationship("Recinto",backref="padrones")
     #relacion habilitado_por
-    operador = db.relationship("Usuario",backref="padrones")
+    habilitador = db.relationship("Usuario",backref="padrones")
 
 class SesionKiosco(db.Model):
     __tablename__ = "sesiones_kiosco"

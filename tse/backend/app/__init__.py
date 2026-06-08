@@ -1,5 +1,5 @@
 from flask import Flask
-from app.extensions import db,bcrypt
+from app.extensions import db,bcrypt,login_manager,migrate
 from app.models import * 
 import os
 
@@ -8,7 +8,8 @@ def create_app():
 
     app = Flask(
         __name__,
-        template_folder=os.path.join(BASE_DIR, "frontend", "templates")
+        template_folder=os.path.join(BASE_DIR, "frontend", "templates"),
+        static_folder=os.path.join(BASE_DIR, "frontend", "static")
     )
 
     app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
@@ -28,5 +29,11 @@ def create_app():
 
     bcrypt.init_app(app)
     db.init_app(app)
+    login_manager.init_app(app)
+    migrate.init_app(app,db)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Usuario.query.get(int(user_id))
 
     return app

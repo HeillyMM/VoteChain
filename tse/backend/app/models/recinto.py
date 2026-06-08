@@ -13,6 +13,8 @@ class Recinto(db.Model):
     total_mesas = db.Column(db.Integer,nullable=False,default=1)
     activo = db.Column(db.Boolean,nullable=False,default=1)
 
+    elecciones = db.relationship("Eleccion",secondary="recintos_elecciones",back_populates="recintos")
+
 class Kiosco(db.Model):
     __tablename__ = "kioscos"
 

@@ -1,3 +1,5 @@
+"""votes.py — kiosco recibe token → muestra boleta → emite voto → llama a vote_service → 
+devuelve hash del bloque para imprimir recibo. """
 from flask import Blueprint, request, jsonify
 from app.services.vote_service import VoteService
 

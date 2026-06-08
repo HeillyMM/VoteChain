@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Usuario{% endblock %}
+
+{% block content %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+
+    <div class="mb-4">
+        <span class="badge bg-primary mb-2">Administración</span>
+        <h2 class="fw-bold mb-1">Registrar Usuario</h2>
+        <p class="text-muted">
+            Cree nuevos administradores, operadores o auditores del sistema.
+        </p>
+    </div>
+
+    <form method="POST">
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">CI</label>
+                <input type="text"
+                       name="ci"
+                       class="form-control"
+                       required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Correo Electrónico</label>
+                <input type="email"
+                       name="email"
+                       class="form-control"
+                       required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Nombres</label>
+                <input type="text"
+                       name="nombres"
+                       class="form-control"
+                       required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Apellidos</label>
+                <input type="text"
+                       name="apellidos"
+                       class="form-control"
+                       required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Contraseña</label>
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Rol</label>
+                <select name="rol_id"
+                        id="rol_id"
+                        class="form-select"
+                        required>
+
+                    <option value="">Seleccione un rol</option>
+                    <option value="1">Administrador</option>
+                    <option value="2">Operador</option>
+                    <option value="3">Auditor</option>
+
+                </select>
+            </div>
+
+            <div class="col-md-12 d-none" id="recinto-container">
+                <label class="form-label">Recinto Asignado</label>
+
+                <select name="recinto_id"
+                        class="form-select">
+                    <option value="" selected disabled>Seleccionar recinto</option>
+                    {% for recinto in recintos %}
+                    <option value="{{ recinto.id }}">
+                        {{ recinto.nombre }} | Departamento: {{recinto.departamento_id}}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+                <small class="text-muted">
+                    Obligatorio para operadores.
+                </small>
+            </div>
+
+        </div>
+
+        <div class="border-top mt-4 pt-3 d-flex gap-2">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Registrar Usuario
+            </button>
+
+            <a href="{{ url_for('bp_auth.usuarios') }}"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+```
+
+</div>
+
+<script>
+document.getElementById("rol_id").addEventListener("change", function() {
+
+    const recintoContainer =
+        document.getElementById("recinto-container");
+
+    if (this.value === "2") {
+        recintoContainer.classList.remove("d-none");
+    } else {
+        recintoContainer.classList.add("d-none");
+    }
+});
+</script>
+
+{% endblock %}

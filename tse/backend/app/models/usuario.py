@@ -1,8 +1,9 @@
 # Tablas usuarios y roles
 from app.extensions import db
 from datetime import datetime
+from flask_login import UserMixin
 
-class Usuario(db.Model):
+class Usuario(db.Model,UserMixin):
     __tablename__ = "usuarios"
 
     id = db.Column(db.Integer,primary_key=True)
@@ -12,10 +13,13 @@ class Usuario(db.Model):
     email = db.Column(db.String(120),nullable=False,unique=True)
     password_hash = db.Column(db.String(255),nullable=False)
     rol_id = db.Column(db.Integer,db.ForeignKey('roles.id'),nullable=False)
+    recinto_id = db.Column(db.Integer,db.ForeignKey('recintos.id'))
     activo = db.Column(db.Boolean,nullable=False,default=1)
     created_at = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
     updated_at = db.Column(db.DateTime,nullable=False,default=datetime.utcnow,onupdate=datetime.utcnow)
 
+    recinto = db.relationship("Recinto",backref="operadores")
+    
 class Rol(db.Model):
     __tablename__ = "roles"
 
