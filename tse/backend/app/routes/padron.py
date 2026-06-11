@@ -56,3 +56,12 @@ def verificar(eleccion_id):
     padron = PadronService.buscar_por_ci(ci, eleccion_id)
 
     return render_template("operator/verificar.html",ciudadano=ciudadano_segip,padron=padron,buscado=ci,eleccion_id=eleccion_id)
+
+@bp_padron.route("/reasignar/<int:eleccion_id>")
+def reasignar(eleccion_id):
+    try:
+        PadronService.reasignar_recinto(eleccion_id)
+        return redirect(url_for("bp_padron.index", id_eleccion=eleccion_id))
+    except ValueError as e:
+        flash(str(e),"danger")
+        return redirect(url_for("bp_padron.index", id_eleccion=eleccion_id))        

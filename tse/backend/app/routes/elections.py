@@ -19,7 +19,7 @@ def index():
 @bp_eleccion.route("/crear", methods=["GET", "POST"])
 def crear():
     if request.method == "GET":
-        return render_template("admin/election_form.html")
+        return render_template("admin/elections/election_form.html")
     try:
         fecha_fin_raw = request.form.get("fecha_fin")
         EleccionService.crear(
@@ -35,13 +35,13 @@ def crear():
     
     except ValueError as e:
         flash(str(e),"danger")
-        return render_template("admin/election_form.html")
+        return render_template("admin/elections/election_form.html")
 
 @bp_eleccion.route("/editar/<int:id>",methods=['GET','POST'])
 def editar(id):
     if request.method == 'GET':
         eleccion = EleccionService.obtener_por_id(id)
-        return render_template("/admin/election_edit_form.html",eleccion=eleccion)
+        return render_template("/admin/elections/election_edit_form.html",eleccion=eleccion)
     fecha_fin_raw = request.form.get("fecha_fin")
     EleccionService.editar(
         codigo = request.form.get("codigo"),
@@ -63,4 +63,4 @@ def eliminar(id):
 @bp_eleccion.route("/dashboard/<int:eleccion_id>")
 def dashboard(eleccion_id):
     eleccion = EleccionService.obtener_por_id(eleccion_id)
-    return render_template("admin/dashboard_eleccion.html",eleccion=eleccion)
+    return render_template("admin/elections/dashboard_eleccion.html",eleccion=eleccion)

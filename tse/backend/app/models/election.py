@@ -24,6 +24,13 @@ class Eleccion(db.Model):
 
 class RecintoEleccion(db.Model):
     __tablename__ = "recintos_elecciones"
+    __table_args__ = (
+    db.UniqueConstraint(
+        'recinto_id',
+        'eleccion_id',
+        name='uq_recinto_eleccion'
+    ),
+    )
 
     recinto_id = db.Column(db.Integer,db.ForeignKey("recintos.id"),primary_key=True)
     eleccion_id = db.Column(db.Integer,db.ForeignKey("elecciones.id"),primary_key=True)

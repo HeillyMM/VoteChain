@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Seleccionar Recintos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">Gestión de Recintos</h2>
+            <p class="text-muted mb-0">Seleccione los recintos activos para: <strong>{{ eleccion.titulo }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" id="btnToggleGlobal">
+                Seleccionar todos
+            </button>
+        </div>
+    </div>
+
+    <form method="POST" action="{{url_for('bp_recinto.seleccion_recintos', eleccion_id=eleccion.id)}}">
+        <div class="accordion" id="accordionDepartamentos">
+            {% for departamento in departamentos %}
+            <div class="accordion-item border-0 mb-3 shadow-sm rounded-3 overflow-hidden">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed bg-white fw-bold py-4" type="button" data-bs-toggle="collapse" data-bs-target="#dept{{ departamento.id }}">
+                        {{ departamento.nombre }}
+                    </button>
+                </h2>
+                <div id="dept{{ departamento.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionDepartamentos">
+                    <div class="accordion-body bg-light">
+                        <div class="form-check mb-4">
+                            <input class="form-check-input select-all-checkbox" type="checkbox" id="checkAll{{ departamento.id }}">
+                            <label class="form-check-label text-primary fw-bold" for="checkAll{{ departamento.id }}">
+                                Seleccionar todos en {{ departamento.nombre }}
+                            </label>
+                        </div>
+                        
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                            {% for recinto in departamento.recintos %}
+                            <div class="col">
+                                <label class="card h-100 border-0 shadow-sm p-3 cursor-pointer hover-shadow transition-all" for="recinto{{ recinto.id }}">
+                                    <div class="d-flex align-items-start">
+                                        <input class="form-check-input mt-1 me-3 recinto-checkbox" type="checkbox" name="recintos_ids" value="{{ recinto.id }}" id="recinto{{ recinto.id }}" {% if recinto in eleccion.recintos %}checked{% endif %}>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ recinto.nombre }}</div>
+                                            <div class="text-muted small mt-1">
+                                                <i class="bi bi-geo-alt"></i> {{ recinto.municipio }} <br>
+                                                <i class="bi bi-hash"></i> Código: {{ recinto.codigo }} <br>
+                                                <i class="bi bi-people"></i> Mesas: {{ recinto.total_mesas }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-4 pt-3 border-top text-end">
+            <button type="submit" class="btn btn-primary btn-lg px-5">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .transition-all { transition: all 0.2s ease; }
+    .hover-shadow:hover { box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; transform: translateY(-2px); }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnGlobal = document.getElementById('btnToggleGlobal');
+    let globalState = false;
+
+    document.querySelectorAll('.select-all-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const container = this.closest('.accordion-body');
+            container.querySelectorAll('.recinto-checkbox').forEach(cb => cb.checked = this.checked);
+        });
+    });
+
+    btnGlobal.addEventListener('click', function() {
+        globalState = !globalState;
+        document.querySelectorAll('.recinto-checkbox, .select-all-checkbox').forEach(cb => cb.checked = globalState);
+        this.innerText = globalState ? "Deseleccionar todos" : "Seleccionar todos";
+        this.classList.toggle('btn-outline-secondary', !globalState);
+        this.classList.toggle('btn-outline-danger', globalState);
+    });
+});
+</script>
+{% endblock %}

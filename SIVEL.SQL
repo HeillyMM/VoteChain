@@ -146,6 +146,23 @@ INSERT IGNORE INTO roles (nombre, descripcion) VALUES
 ('OPERADOR', 'Operador de mesa. Verifica identidad y habilita kioscos.'),
 ('AUDITOR',  'Solo lectura. Accede a la cadena pública y resultados.');
 
+-- ── Recintos ─────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS recintos (
+    id              INT          NOT NULL AUTO_INCREMENT,
+    codigo          VARCHAR(20)  NOT NULL,
+    nombre          VARCHAR(150) NOT NULL,
+    direccion       VARCHAR(200) NULL,
+    municipio       VARCHAR(80)  NOT NULL,
+    departamento_id TINYINT      NOT NULL,
+    total_mesas     INT          NOT NULL DEFAULT 1,
+    activo          TINYINT(1)   NOT NULL DEFAULT 1,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_codigo_recinto (codigo),
+    CONSTRAINT fk_recinto_depto FOREIGN KEY (departamento_id)
+        REFERENCES departamentos (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ── Usuarios TSE ─────────────────────────────────────────────
 -- Funcionarios del TSE. No son ciudadanos del padrón.
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -166,26 +183,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
     UNIQUE KEY uq_email (email),
     INDEX idx_rol (rol_id),
     CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id)
-        REFERENCES roles (id)
+        REFERENCES roles (id),
     CONSTRAINT fk_usuario_recinto 
-    FOREIGN KEY (recinto_id) REFERENCES recintos(id);
+    FOREIGN KEY (recinto_id) REFERENCES recintos(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Recintos ─────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS recintos (
-    id              INT          NOT NULL AUTO_INCREMENT,
-    codigo          VARCHAR(20)  NOT NULL,
-    nombre          VARCHAR(150) NOT NULL,
-    direccion       VARCHAR(200) NULL,
-    municipio       VARCHAR(80)  NOT NULL,
-    departamento_id TINYINT      NOT NULL,
-    total_mesas     INT          NOT NULL DEFAULT 1,
-    activo          TINYINT(1)   NOT NULL DEFAULT 1,
-    PRIMARY KEY (id),
-    UNIQUE KEY uq_codigo_recinto (codigo),
-    CONSTRAINT fk_recinto_depto FOREIGN KEY (departamento_id)
-        REFERENCES departamentos (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Kioscos ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS kioscos (
@@ -273,7 +275,6 @@ CREATE TABLE IF NOT EXISTS padron_electoral (
     updated_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
                                        ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_ci_padron (ci),
     INDEX idx_ci_padron (ci),
     INDEX idx_recinto_mesa (recinto_id, mesa_numero),
     CONSTRAINT fk_padron_recinto  FOREIGN KEY (recinto_id)
@@ -413,3 +414,78 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     CONSTRAINT fk_audit_eleccion FOREIGN KEY (eleccion_id)
         REFERENCES elecciones (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+--- llenando base de datos
+
+USE tse_db;
+
+INSERT INTO recintos
+(codigo,nombre,direccion,municipio,departamento_id,total_mesas,activo)
+VALUES
+('LP001','Unidad Educativa Bolívar','Av. Principal 123','Viacha',1,10,1),
+('LP002','Colegio Mariscal Sucre','Zona Central','Achacachi',1,8,1),
+('CB001','Unidad Educativa Cochabamba','Av. Aroma','Cercado',2,12,1),
+('SC001','Colegio Montero Norte','Zona Norte','Montero',3,15,1),
+('SC002','Unidad Educativa Warnes','Av. Warnes','Warnes',3,10,1),
+('OR001','Colegio Huanuni','Zona Minera','Huanuni',4,7,1),
+('PT001','Unidad Educativa Potosí','Zona Central','Potosi',5,9,1),
+('TJ001','Colegio Tarija Sur','Av. La Banda','Tarija',6,8,1),
+('CH001','Unidad Educativa Sucre','Av. Hernando Siles','Sucre',7,12,1),
+('BE001','Colegio Trinidad','Zona Central','Trinidad',8,6,1),
+('PA001','Unidad Educativa Cobija','Av. Internacional','Cobija',9,5,1),
+('SC003','Colegio Plan 3000','Plan 3000','Santa Cruz',3,18,1);
+
+INSERT INTO usuarios
+(ci,nombres,apellidos,email,password_hash,rol_id,activo)
+VALUES
+('16564359','Helen Keilly','Mamani Mollinedo','helenkeylli@gmail.com','$2b$12$4jeFssNNinyNNoQA0HpY/uJZdDPlrjhUnUEQsl9FcmAe1EW8YBury',1,1),
+('64155610','Limber Limachi','Perez','limberlimachi@gmail.com','$2b$12$4jeFssNNinyNNoQA0HpY/uJZdDPlrjhUnUEQsl9FcmAe1EW8YBury',2,1),
+('79124712','Melany Aidee','Gonzales','melanyaidee@gmail.com','$2b$12$4jeFssNNinyNNoQA0HpY/uJZdDPlrjhUnUEQsl9FcmAe1EW8YBury',3,1);
+
+INSERT INTO elecciones
+(codigo,titulo,descripcion,tipo,estado,fecha_inicio,fecha_fin,created_by)
+VALUES
+('PRES2026','Elección Presidencial 2026','Elección general presidencial','PRESIDENCIAL','CONFIGURACION','2026-07-01 08:00:00','2026-07-01 18:00:00',1),
+('MUNI2026','Elección Municipal 2026','Elección de alcaldes','MUNICIPAL','CONFIGURACION','2026-08-15 08:00:00','2026-08-15 18:00:00',1),
+('REF2026','Referéndum Nacional 2026','Consulta ciudadana','REFERENDUM','CONFIGURACION','2026-09-10 08:00:00','2026-09-10 18:00:00',1);
+
+INSERT INTO recintos_elecciones
+(recinto_id,eleccion_id)
+VALUES
+(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(1,2),(3,2),(5,2),(7,2),(9,2),(2,3),(4,3),(6,3),(8,3),(10,3),(11,3);
+
+INSERT INTO kioscos
+(recinto_id,nombre,activo)
+VALUES
+(1,'KIOSCO-1',1),
+(1,'KIOSCO-2',1),
+(2,'KIOSCO-1',1),
+(3,'KIOSCO-1',1),
+(3,'KIOSCO-2',1),
+(4,'KIOSCO-1',1),
+(5,'KIOSCO-1',1),
+(6,'KIOSCO-1',1),
+(7,'KIOSCO-1',1),
+(8,'KIOSCO-1',1),
+(9,'KIOSCO-1',1),
+(10,'KIOSCO-1',1),
+(11,'KIOSCO-1',1),
+(12,'KIOSCO-1',1);
+
+
+INSERT INTO candidatos
+(eleccion_id,numero_lista,sigla_partido,nombre_partido,nombres,apellido_paterno,apellido_materno,activo)
+VALUES
+(1,1,'MAS','Movimiento al Socialismo','Luis','Arce','Catacora',1),
+(1,2,'CC','Comunidad Ciudadana','Carlos','Mesa','Gisbert',1),
+(1,3,'LIBRE','Libre Bolivia','Jorge','Quiroga','Ramirez',1);
+
+
+INSERT INTO candidatos
+(eleccion_id,numero_lista,sigla_partido,nombre_partido,nombres,apellido_paterno,apellido_materno,activo)
+VALUES
+(2,1,'SUMATE','SUMATE','Manfred','Reyes','Villa',1),
+(2,2,'UCS','Unidad Civica','Jhonny','Fernandez','Saucedo',1),
+(2,3,'MTS','Movimiento Tercer Sistema','Felix','Patzi','Paco',1);

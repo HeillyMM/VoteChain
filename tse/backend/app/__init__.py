@@ -21,11 +21,13 @@ def create_app():
     from app.routes.auth import bp_auth
     from app.routes.elections import bp_eleccion
     from app.routes.candidates import bp_candidato
+    from app.routes.recinto import bp_recinto
 
     app.register_blueprint(bp_padron, url_prefix="/padron")
     app.register_blueprint(bp_auth, url_prefix="/")
     app.register_blueprint(bp_eleccion)
     app.register_blueprint(bp_candidato)
+    app.register_blueprint(bp_recinto)
 
     bcrypt.init_app(app)
     db.init_app(app)

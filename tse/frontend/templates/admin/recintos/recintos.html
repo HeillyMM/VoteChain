@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Recintos{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+    <h2 class="fw-bold mb-1">Listado de Recintos</h2>
+    {% if modo_admin %}
+    <p class="text-muted mb-0">Administración de recintos electorales</p>
+    {% endif %}
+</div>
+{% if modo_admin %}
+<a href="{{ url_for('bp_recinto.crear') }}" class="btn btn-primary">+ Nuevo Recinto</a>
+{% else %}
+<a href="{{ url_for('bp_recinto.seleccion_recintos', eleccion_id=eleccion_id) }}" class="btn btn-primary">Recintos</a>
+{% endif %}
+</div>
+
+<!-- FILTRO -->
+
+<div class="card shadow-sm mb-4">
+<div class="card-body">
+    <div class="row">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">
+                Filtrar por Departamento
+            </label>
+            <select id="filtroDepartamento"
+                    class="form-select">
+                <option value="">
+                    Todos los departamentos
+                </option>
+                {% for departamento in departamentos %}
+                    <option value="{{ departamento.id }}">
+                        {{ departamento.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- TABLA -->
+
+<div class="card shadow-sm">
+<div class="card-body">
+    {% if recintos %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Municipio</th>
+                    <th>Dirección</th>
+                    <th>Mesas</th>
+                    <th>Estado</th>
+                    {% if modo_admin %}
+                    <th class="text-center">Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for recinto in recintos %}
+                <tr class="fila-recinto"
+                    data-departamento="{{ recinto.departamento_id }}">
+                    <td>{{ recinto.codigo }}</td>
+                    <td>{{ recinto.nombre }}</td>
+                    <td>{{ recinto.municipio }}</td>
+                    <td>{{ recinto.direccion }}</td>
+                    <td>{{ recinto.total_mesas }}</td>
+                    <td>
+                        {% if recinto.activo %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    {% if modo_admin %}
+                    <td class="text-center">
+                        <a href="{{ url_for('bp_recinto.editar', recinto_id=recinto.id) }}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{{ url_for('bp_recinto.eliminar', recinto_id=recinto.id) }}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info mb-0">No existen recintos registrados.</div>
+    {% endif %}
+</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filtro = document.getElementById("filtroDepartamento");
+    filtro.addEventListener("change", function () {
+        const departamentoSeleccionado = this.value;
+        const filas = document.querySelectorAll(".fila-recinto");
+        filas.forEach(fila => {
+            const departamentoFila = fila.dataset.departamento;
+            if (
+                departamentoSeleccionado === "" ||
+                departamentoFila === departamentoSeleccionado
+            ) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
