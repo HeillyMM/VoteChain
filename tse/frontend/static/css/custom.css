@@ -1,11 +1,29 @@
+/* =========================
+GENERAL
+========================= */
+
 body{
-background-color:#f4f6f9;
-min-height:100vh;
+    background: #f4f6f9;
+    min-height: 100vh;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.container{
+    padding-top: 20px;
+}
+
+/* =========================
+NAVBAR
+========================= */
+
+.navbar{
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
 }
 
 .navbar-brand{
-font-size:1.4rem;
-font-weight:700;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .5px;
 }
 
 /* =========================
@@ -13,20 +31,34 @@ TARJETAS
 ========================= */
 
 .card{
-border:none;
-border-radius:20px;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-transition:0.3s;
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    transition: all .3s ease;
 }
 
 .card:hover{
-transform:translateY(-5px);
-box-shadow:0 0 20px rgba(0,0,0,.15);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,.12);
 }
 
-.card h2{
-color:#5b3df5;
-font-weight:bold;
+.card-header{
+    background: white;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+}
+
+.card-footer{
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.card h2,
+.card h3,
+.card h4{
+    color: #5b3df5;
+    font-weight: 700;
 }
 
 /* =========================
@@ -34,38 +66,66 @@ IMÁGENES
 ========================= */
 
 .card-img-top{
-height:300px;
-object-fit:cover;
+    height: 300px;
+    object-fit: cover;
 }
 
 .logo-partido{
-width:120px;
-height:80px;
-object-fit:contain;
+    width: 120px;
+    height: 80px;
+    object-fit: contain;
 }
-
 
 /* =========================
 FORMULARIOS
 ========================= */
 
-.form-control{
-border-radius:10px;
+.form-control,
+.form-select{
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color: #5b3df5;
+    box-shadow: 0 0 0 .2rem rgba(91,61,245,.2);
+}
+
+.form-label{
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
 .form-check-input{
-width:1.4rem;
-height:1.4rem;
-cursor:pointer;
+    width: 1.3rem;
+    height: 1.3rem;
+    cursor: pointer;
 }
 
-/* Radio Button Boleta */
+.form-check-input:checked{
+    background-color: #5b3df5;
+    border-color: #5b3df5;
+}
+
+/* =========================
+BOLETA
+========================= */
 
 .candidato-radio{
-width:35px;
-height:35px;
-cursor:pointer;
-border-color: black;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+}
+
+.candidato-radio:checked{
+    background-color: #5b3df5;
+    border-color: #5b3df5;
+}
+
+.candidato-card{
+    cursor: pointer;
 }
 
 /* =========================
@@ -73,29 +133,32 @@ BOTONES
 ========================= */
 
 .btn{
-border-radius:10px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all .25s ease;
 }
 
 .btn-primary{
-background:#5b3df5;
-border:none;
-font-weight:600;
+    background: #5b3df5;
+    border-color: #5b3df5;
 }
 
-.btn-primary:hover
+.btn-primary:hover{
+    background: #4b2de5;
+    border-color: #4b2de5;
+    transform: translateY(-2px);
+}
 
 .btn-success{
-font-weight:600;
+    font-weight: 600;
 }
 
-/* Botón Emitir Voto */
-
 .btn-votar{
-font-size:1.4rem;
-font-weight:700;
-padding:15px 60px;
-border-radius:15px;
-min-width:250px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 14px 50px;
+    border-radius: 14px;
+    min-width: 250px;
 }
 
 /* =========================
@@ -103,13 +166,15 @@ TABLAS
 ========================= */
 
 .table{
-vertical-align:middle;
+    vertical-align: middle;
 }
 
-.table-hover tbody tr:hover
+.table thead th{
+    text-align: center;
+}
 
-.table-dark th{
-text-align:center;
+.table-hover tbody tr:hover{
+    background-color: rgba(91,61,245,.05);
 }
 
 /* =========================
@@ -117,8 +182,18 @@ BADGES
 ========================= */
 
 .badge{
-font-size:0.9rem;
-padding:8px 12px;
+    padding: 8px 12px;
+    font-size: .85rem;
+    border-radius: 10px;
+}
+
+/* =========================
+ALERTAS
+========================= */
+
+.alert{
+    border: none;
+    border-radius: 12px;
 }
 
 /* =========================
@@ -126,7 +201,12 @@ TEXTOS
 ========================= */
 
 .display-6{
-color:#5b3df5;
+    color: #5b3df5;
+    font-weight: 700;
+}
+
+.text-muted{
+    color: #6c757d !important;
 }
 
 /* =========================
@@ -134,5 +214,28 @@ FOOTER
 ========================= */
 
 footer{
-margin-top:auto;
+    margin-top: auto;
+    padding: 20px 0;
+    color: #6c757d;
+}
+.navbar{
+    background:#5b3df5;
+}
+
+.footer-custom{
+    background:#1f2937;
+    color:white;
+    padding:20px 0;
+}
+
+.nav-link{
+    font-weight:500;
+}
+
+.nav-link:hover{
+    color:#ffffff;
+}
+
+.navbar-text{
+    color:white !important;
 }
