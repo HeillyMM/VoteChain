@@ -1,130 +1,63 @@
 {% extends "base.html" %}
-
-{% block title %}Actualizar Usuario{% endblock %}
+{% block title %}Editar usuario · Voto Cadena{% endblock %}
 
 {% block content %}
-
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-
-```
-    <div class="mb-4">
-        <span class="badge bg-primary mb-2">Administración</span>
-        <h2 class="fw-bold mb-1">Actualizar Usuario</h2>
-    </div>
-
-    <form method="POST">
-
-        <div class="row g-3">
-
-            <div class="col-md-6">
-                <label class="form-label">CI</label>
-                <input type="text"
-                       name="ci"
-                       class="form-control"
-                       value="{{usuario.ci}}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Correo Electrónico</label>
-                <input type="email"
-                       name="email"
-                       class="form-control"
-                       value="{{usuario.email}}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Nombres</label>
-                <input type="text"
-                       name="nombres"
-                       class="form-control"
-                       value="{{usuario.nombres}}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Apellidos</label>
-                <input type="text"
-                       name="apellidos"
-                       class="form-control"
-                       value="{{usuario.apellidos}}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Contraseña</label>
-                <input type="password"
-                       name="password"
-                       class="form-control"
-                       value="{{usuario.password}}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Rol</label>
-                <select name="rol_id"
-                        id="rol_id"
-                        class="form-select"
-                        required>
-
-                    <option value="1" {% if usuario.rol_id == 1 %}selected{% endif %}>Administrador</option>
-                    <option value="2" {% if usuario.rol_id == 2 %}selected{% endif %}>Operador</option>
-                    <option value="3" {% if usuario.rol_id == 3 %}selected{% endif %}>Auditor</option>
-
-                </select>
-            </div>
-
-            <div class="col-md-12 d-none" id="recinto-container">
-                <label class="form-label">Recinto Asignado</label>
-
-                <select name="recinto_id"
-                        class="form-select">
-
-                    {% for recinto in recintos %}
-                    <option value="{{ recinto.id }}">
-                        {{ recinto.nombre }} | Departamento: {{recinto.departamento_id}}
-                    </option>
-                    {% endfor %}
-
-                </select>
-
-                <small class="text-muted">
-                    Obligatorio para operadores.
-                </small>
-            </div>
-
-        </div>
-
-        <div class="border-top mt-4 pt-3 d-flex gap-2">
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Actualizar Usuario
-            </button>
-
-            <a href="{{ url_for('bp_auth.usuarios') }}"
-               class="btn btn-outline-secondary">
-                Cancelar
-            </a>
-
-        </div>
-
-    </form>
-
+<div class="page-header">
+  <div>
+    <div class="eyebrow"><a href="{{ url_for('panel.usuarios') }}">Usuarios</a></div>
+    <h1>Editar usuario</h1>
+  </div>
 </div>
-```
 
+<div class="card" style="max-width:560px">
+  <form method="POST" action="{{ url_for('panel.editar_usuario', uid=u.id) }}">
+    <div class="field">
+      <label>CI (no editable)</label>
+      <input type="text" value="{{ u.ci }}" disabled class="mono muted">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="nombres">Nombres</label>
+        <input type="text" id="nombres" name="nombres" required value="{{ u.nombres }}">
+      </div>
+      <div class="field">
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" name="apellidos" required value="{{ u.apellidos }}">
+      </div>
+    </div>
+    <div class="field">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" name="email" required value="{{ u.email }}">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="rol_id">Rol</label>
+        <select id="rol_id" name="rol_id" onchange="toggleRecinto(this.value)">
+          {% for r in roles %}
+          <option value="{{ r.id }}" {{ 'selected' if r.id == u.rol_id }}>{{ r.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field" id="campo-recinto" style="{{ '' if u.rol_id == 2 else 'display:none' }}">
+        <label for="recinto_id">Recinto asignado</label>
+        <select id="recinto_id" name="recinto_id">
+          <option value="">— ninguno —</option>
+          {% for r in recintos %}
+          <option value="{{ r.id }}" {{ 'selected' if u.recinto_id == r.id }}>{{ r.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="gap-actions">
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <a href="{{ url_for('panel.usuarios') }}" class="btn btn-ghost">Cancelar</a>
+    </div>
+  </form>
 </div>
 
 <script>
-document.getElementById("rol_id").addEventListener("change", function() {
-
-    const recintoContainer =
-        document.getElementById("recinto-container");
-
-    if (this.value === "2") {
-        recintoContainer.classList.remove("d-none");
-    } else {
-        recintoContainer.classList.add("d-none");
-    }
-});
+function toggleRecinto(rolId) {
+  document.getElementById('campo-recinto').style.display = rolId == '2' ? '' : 'none';
+}
 </script>
-
 {% endblock %}

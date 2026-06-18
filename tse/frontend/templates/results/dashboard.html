@@ -1,138 +1,39 @@
 {% extends "base.html" %}
-
-{% block title %}
-Resultados Electorales
-{% endblock %}
+{% block title %}Resultados · Voto Cadena{% endblock %}
 
 {% block content %}
-
-<div class="mb-4">
-
-    <h2 class="fw-bold">
-        Resultados Electorales
-    </h2>
-
-    <p class="text-muted">
-        Resultados preliminares de la elección.
-    </p>
-
+<div class="page-header">
+  <div>
+    <div class="eyebrow">Transparencia</div>
+    <h1>Resultados electorales</h1>
+  </div>
 </div>
 
-<div class="row">
-
-    <div class="col-md-5">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <table class="table table-hover">
-
-                    <thead class="table-dark">
-
-                        <tr>
-                            <th>Candidato</th>
-                            <th>Votos</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-                            <td>Jorge Tuto Quiroga</td>
-                            <td>250</td>
-                        </tr>
-
-                        <tr>
-                            <td>Rodrigo Paz</td>
-                            <td>320</td>
-                        </tr>
-
-                        <tr>
-                            <td>Samuel Doria Medina</td>
-                            <td>180</td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+{% if elecciones %}
+<div class="card-row">
+  {% for e in elecciones %}
+  <div class="card">
+    <div class="flex-between" style="margin-bottom:.5rem">
+      <span class="mono muted" style="font-size:.8rem">{{ e.codigo }}</span>
+      {% if e.estado == 'ACTIVA' %}<span class="badge badge-verde">En curso</span>
+      {% elif e.estado == 'CERRADA' %}<span class="badge badge-gris">Finalizada</span>
+      {% elif e.estado == 'CONFIGURACION' %}<span class="badge badge-amarillo">Configuración</span>
+      {% else %}<span class="badge badge-rojo">Suspendida</span>{% endif %}
     </div>
-
-    <div class="col-md-7">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <canvas id="graficoResultados"></canvas>
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <div style="font-weight:bold;margin-bottom:.25rem">{{ e.titulo }}</div>
+    <div class="muted" style="font-size:.85rem">{{ e.departamento.nombre }} · {{ e.tipo }}</div>
+    <div class="muted" style="font-size:.82rem;margin-top:.25rem">{{ e.fecha_inicio.strftime('%d/%m/%Y') }}</div>
+    <a href="{{ url_for('panel.resultados_eleccion', eleccion_id=e.id) }}"
+       class="btn btn-ghost btn-sm mt-1">
+      {% if e.estado == 'ACTIVA' %}Ver participación en tiempo real →
+      {% elif e.estado == 'CERRADA' %}Ver resultados finales →
+      {% else %}Ver detalle →{% endif %}
+    </a>
+  </div>
+  {% endfor %}
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-
-const ctx =
-document.getElementById('graficoResultados');
-
-new Chart(ctx, {
-
-    type: 'bar',
-
-    data: {
-
-        labels: [
-
-            'Jorge Tuto Quiroga',
-            'Rodrigo Paz',
-            'Samuel Doria Medina'
-
-        ],
-
-        datasets: [{
-
-            label: 'Cantidad de Votos',
-
-            data: [
-
-                250,
-                320,
-                180
-
-            ]
-
-        }]
-
-    },
-
-    options: {
-
-        responsive: true,
-
-        plugins: {
-
-            legend: {
-                display: true
-            }
-
-        }
-
-    }
-
-});
-
-</script>
+{% else %}
+<div class="empty">No hay elecciones registradas todavía.</div>
+{% endif %}
 
 {% endblock %}

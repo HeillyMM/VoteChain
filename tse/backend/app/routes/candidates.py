@@ -1,115 +1,94 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from app.services.candidato_service import CandidatoService
-from app.services.election_service import EleccionService
-from werkzeug.utils import secure_filename
-import os
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import get_jwt_identity
 
-bp_candidato = Blueprint("bp_candidato", __name__, url_prefix="/candidatos")
+from app.models import Usuario
+from app.services import candidato_service
+from app.decorators import rol_requerido, jwt_requerido
 
-
-@bp_candidato.route("/<int:eleccion_id>")
-def index(eleccion_id):
-    candidatos = CandidatoService.listar(eleccion_id)
-    eleccion = EleccionService.obtener_por_id(eleccion_id)
-
-    return render_template("admin/candidates/candidates.html",candidatos=candidatos,eleccion=eleccion)
+bp = Blueprint("candidates", __name__, url_prefix="/api/elecciones/<int:eleccion_id>/candidatos")
 
 
-@bp_candidato.route("/nuevo/<int:eleccion_id>", methods=["GET", "POST"])
-def create(eleccion_id):
-
-    if request.method == "GET":
-        return render_template("admin/candidates/candidate_form.html",eleccion_id=eleccion_id)
-    
-    logo = request.files.get("logo_partido")
-    foto = request.files.get("foto_candidato")
-    
-    foto_nombre = None
-    logo_nombre = None
-
-    if foto and foto.filename:
-        foto_nombre = secure_filename(foto.filename)
-        foto.save(os.path.join("frontend/static/img/candidatos", foto_nombre))
-
-    if logo and logo.filename:
-        logo_nombre = secure_filename(logo.filename)
-        logo.save(os.path.join("frontend/static/img/partidos", logo_nombre))
-
-    CandidatoService.crear(
-        eleccion_id=eleccion_id,
-        numero_lista=CandidatoService.nro_lista(eleccion_id),
-        sigla_partido=request.form.get("sigla_partido"),
-        nombre_partido=request.form.get("nombre_partido"),
-        nombres=request.form.get("nombres"),
-        apellido_paterno=request.form.get("apellido_paterno"),
-        apellido_materno=request.form.get("apellido_materno"),
-        formula_nombres=request.form.get("formula_nombres"),
-        formula_apellido_paterno=request.form.get("formula_apellido_paterno"),
-        logo_partido=logo_nombre,
-        foto_candidato=foto_nombre,
-        color_partido=request.form.get("color_partido"),
-        propuesta_breve=request.form.get("propuesta_breve")
-    )
-
-    return redirect(url_for("bp_candidato.index",eleccion_id=eleccion_id))
+def _serializar(c):
+    return {
+        "id": c.id,
+        "numero_lista": c.numero_lista,
+        "sigla_partido": c.sigla_partido,
+        "nombre_partido": c.nombre_partido,
+        "nombres": c.nombres,
+        "apellido_paterno": c.apellido_paterno,
+        "apellido_materno": c.apellido_materno,
+        "nombre_completo": c.nombre_completo,
+        "formula_completa": c.formula_completa,
+        "logo_partido": c.logo_partido,
+        "foto_candidato": c.foto_candidato,
+        "color_partido": c.color_partido,
+        "propuesta_breve": c.propuesta_breve,
+        "activo": c.activo,
+    }
 
 
-@bp_candidato.route("/toggle/<int:id>")
-def toggle(id):
-    candidato = CandidatoService.obtener_por_id(id)
-    CandidatoService.toggle_activo(id)
-    return redirect(url_for("bp_candidato.index",eleccion_id=candidato.eleccion_id))
+@bp.route("", methods=["GET"])
+@jwt_requerido
+def listar(eleccion_id):
+    solo_activos = request.args.get("solo_activos", "true").lower() != "false"
+    candidatos = candidato_service.listar_candidatos(eleccion_id, solo_activos=solo_activos)
+    return jsonify([_serializar(c) for c in candidatos])
 
 
-@bp_candidato.route("/editar/<int:eleccion_id>/<int:id>",methods=['GET','POST'])
-def editar(eleccion_id,id):
+@bp.route("", methods=["POST"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def crear(eleccion_id):
+    """Botón 'Agregar candidato'."""
+    data = request.get_json(silent=True) or {}
 
-    candidato = CandidatoService.obtener_por_id(id)
-    if request.method == "GET":
-        return render_template("admin/candidates/candidate_edit_form.html",eleccion_id=eleccion_id,candidato=candidato)
-    
-    logo = request.files.get("logo_partido")
-    foto = request.files.get("foto_candidato")
-    
-    foto_nombre = None
-    logo_nombre = None
+    requeridos = ("numero_lista", "sigla_partido", "nombres", "apellido_paterno")
+    faltantes = [c for c in requeridos if not data.get(c)]
+    if faltantes:
+        return jsonify({"error": f"Campos requeridos faltantes: {', '.join(faltantes)}"}), 400
 
-    if foto and foto.filename:
-        foto_nombre = secure_filename(foto.filename)
-        foto.save(os.path.join("frontend/static/img/candidatos", foto_nombre))
-    else:
-        foto_nombre = candidato.foto_candidato
+    try:
+        candidato = candidato_service.crear_candidato(
+            eleccion_id=eleccion_id,
+            datos=data,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except candidato_service.CandidatoError as e:
+        return jsonify({"error": str(e)}), 400
 
-    if logo and logo.filename:
-        logo_nombre = secure_filename(logo.filename)
-        logo.save(os.path.join("frontend/static/img/partidos", logo_nombre))
-    else:
-        logo_nombre = candidato.logo_partido
-
-    CandidatoService.editar(
-        eleccion_id=eleccion_id,
-        sigla_partido=request.form.get("sigla_partido"),
-        nombre_partido=request.form.get("nombre_partido"),
-        nombres=request.form.get("nombres"),
-        apellido_paterno=request.form.get("apellido_paterno"),
-        apellido_materno=request.form.get("apellido_materno"),
-        formula_nombres=request.form.get("formula_nombres"),
-        formula_apellido_paterno=request.form.get("formula_apellido_paterno"),
-        logo_partido=logo_nombre,
-        foto_candidato=foto_nombre,
-        color_partido=request.form.get("color_partido"),
-        propuesta_breve=request.form.get("propuesta_breve"),
-        activo = "activo" in request.form,
-        id=id
-    )
-
-    return redirect(url_for("bp_candidato.index",eleccion_id=eleccion_id))
+    return jsonify({"id": candidato.id, "mensaje": "Candidato agregado correctamente"}), 201
 
 
-@bp_candidato.route("/eliminar/<int:id>")
-def delete(id):
-    candidato = CandidatoService.obtener_por_id(id)
-    eleccion_id = candidato.eleccion_id
-    CandidatoService.eliminar(id)
+@bp.route("/<int:candidato_id>", methods=["PUT"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def actualizar(eleccion_id, candidato_id):
+    """Botón 'Editar candidato'."""
+    data = request.get_json(silent=True) or {}
 
-    return redirect(url_for("bp_candidato.index",eleccion_id=eleccion_id))
+    try:
+        candidato_service.actualizar_candidato(
+            candidato_id=candidato_id,
+            datos=data,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except candidato_service.CandidatoError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"mensaje": "Candidato actualizado correctamente"})
+
+
+@bp.route("/<int:candidato_id>", methods=["DELETE"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def eliminar(eleccion_id, candidato_id):
+    """Botón 'Eliminar candidato'."""
+    try:
+        candidato_service.eliminar_candidato(
+            candidato_id=candidato_id,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except candidato_service.CandidatoError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"mensaje": "Candidato eliminado correctamente"})

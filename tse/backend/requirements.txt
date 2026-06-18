@@ -1,10 +1,7 @@
 Flask
 Flask-SQLAlchemy
-Flask-Login
-Flask-Bcrypt
-Flask-Migrate
-Flask-WTF
+Flask-JWT-Extended
 PyMySQL
-requests
 cryptography
 ecdsa
+requests

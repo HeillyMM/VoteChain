@@ -1,67 +1,153 @@
-# Check
-from flask import Blueprint, render_template, redirect, url_for, request, flash,abort
-from flask_login import login_required,current_user
-from app.services.padron_service import PadronService
-from app.services.segip_service import SegipService
-from app.models.election import Eleccion
-from app.models.usuario import Usuario
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import get_jwt_identity, get_jwt
 
-bp_padron = Blueprint("bp_padron", __name__)
+from app.models import Usuario
+from app.services import padron_service, segip_service
+from app.decorators import rol_requerido
 
-@bp_padron.route("/<int:id_eleccion>")
-@login_required
-def index(id_eleccion):
-    if current_user.rol_id != 1 and current_user.rol_id !=2:
-        abort(403)
-    if current_user.rol_id == 2:
-        recinto_id = Usuario.query.get(current_user.id).recinto.id
-        padron = PadronService.listar_operador(id_eleccion,recinto_id) 
-    else:
-        padron = PadronService.listar(id_eleccion)
-    return render_template("admin/padron.html", padron=padron, id_eleccion=id_eleccion)
+bp = Blueprint("padron", __name__, url_prefix="/api/elecciones/<int:eleccion_id>/padron")
 
-@bp_padron.route("/importar/<int:id_eleccion>")
-@login_required
-def importar_padron(id_eleccion):
-    if current_user.rol_id !=1:
-        abort(403)
-    recintos = Eleccion.query.get(id_eleccion).recintos
-    if not recintos:
-        flash("No hay recintos registrados. Crea recintos antes de construir el padrón.", "danger")
-        return redirect(url_for("bp_padron.index", id_eleccion=id_eleccion))
-    
+
+def _serializar(p):
+    return {
+        "id": p.id,
+        "ci": p.ci,
+        "nombre_completo": p.nombre_completo,
+        "sexo": p.sexo,
+        "fecha_nacimiento": p.fecha_nacimiento.isoformat(),
+        "departamento_id": p.departamento_id,
+        "recinto_id": p.recinto_id,
+        "recinto_nombre": p.recinto.nombre if p.recinto else None,
+        "mesa_numero": p.mesa_numero,
+        "habilitado": p.habilitado,
+        "motivo_inhabilitacion": p.motivo_inhabilitacion,
+        "ya_voto": p.ya_voto,
+        "hora_voto": p.hora_voto.isoformat() if p.hora_voto else None,
+    }
+
+
+@bp.route("", methods=["GET"])
+@rol_requerido(Usuario.ROL_ADMIN, Usuario.ROL_OPERADOR, Usuario.ROL_AUDITOR)
+def listar(eleccion_id):
+    """
+    Lista el padrón. Si el usuario es AUDITOR, no se exponen nombres
+    (solo CI parcial y estado), para no revelar identidades de votantes.
+    """
+    claims = get_jwt()
+    recinto_id = request.args.get("recinto_id", type=int)
+
+    padron = padron_service.listar_padron(eleccion_id, recinto_id=recinto_id)
+
+    if claims.get("rol_id") == Usuario.ROL_AUDITOR:
+        return jsonify(
+            [
+                {
+                    "id": p.id,
+                    "ci_parcial": p.ci[:4] + "****",
+                    "recinto_id": p.recinto_id,
+                    "recinto_nombre": p.recinto.nombre if p.recinto else None,
+                    "mesa_numero": p.mesa_numero,
+                    "habilitado": p.habilitado,
+                    "ya_voto": p.ya_voto,
+                }
+                for p in padron
+            ]
+        )
+
+    return jsonify([_serializar(p) for p in padron])
+
+
+@bp.route("/construir", methods=["POST"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def construir(eleccion_id):
+    """
+    Botón "Consultar y agregar usuarios habilitados para las elecciones".
+    Consulta SEGIP y agrega al padrón TSE a quienes:
+      - tienen 18+ años al día de la votación
+      - están vivos
+      - pertenecen al departamento de esta elección
+    """
     try:
-        resultado = PadronService.construir_padron(id_eleccion)
-        flash(f"Padrón construido. Agregados: {resultado['agregados']}. "f"Sin recinto disponible: {resultado['sin_recinto']}.","success")
-    except Exception as e:
-        flash(str(e), "danger")
+        resumen = padron_service.construir_padron(
+            eleccion_id=eleccion_id,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except padron_service.PadronError as e:
+        return jsonify({"error": str(e)}), 400
+    except segip_service.SegipError as e:
+        return jsonify({"error": f"Error al conectar con SEGIP: {e}"}), 502
 
-    return redirect(url_for("bp_padron.index", id_eleccion=id_eleccion))
+    return jsonify(resumen)
 
-
-@bp_padron.route("/verificar/<int:eleccion_id>", methods=["GET", "POST"])
-@login_required
-def verificar(eleccion_id):
-    if current_user.rol_id != 1 and current_user.rol_id !=2:
-        abort(403)
-    if request.method == "GET":
-        return render_template("operator/verificar.html",ciudadano=None,padron=None,buscado="",eleccion_id=eleccion_id)
-
-    ci = request.form.get("ci")
-    if not ci:
-        flash("Ingresa una cédula de identidad.", "warning")
-        return redirect(url_for("bp_padron.verificar", eleccion_id=eleccion_id))
-
-    ciudadano_segip = SegipService().obtener_ciudano(ci=ci)
-    padron = PadronService.buscar_por_ci(ci, eleccion_id)
-
-    return render_template("operator/verificar.html",ciudadano=ciudadano_segip,padron=padron,buscado=ci,eleccion_id=eleccion_id)
-
-@bp_padron.route("/reasignar/<int:eleccion_id>")
-def reasignar(eleccion_id):
+@bp.route("/distribuir", methods=["POST"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def distribuir(eleccion_id):
+    """Botón 'Distribuir padrón en recintos y mesas'."""
     try:
-        PadronService.reasignar_recinto(eleccion_id)
-        return redirect(url_for("bp_padron.index", id_eleccion=eleccion_id))
-    except ValueError as e:
-        flash(str(e),"danger")
-        return redirect(url_for("bp_padron.index", id_eleccion=eleccion_id))        
+        resumen = padron_service.distribuir_padron(
+            eleccion_id=eleccion_id,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except padron_service.PadronError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify(resumen)
+
+@bp.route("/actualizar", methods=["POST"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def actualizar(eleccion_id):
+    """
+    Botón "Actualizar padrón".
+    Vuelve a consultar SEGIP: agrega nuevos elegibles e inhabilita a
+    quienes el SEGIP ahora reporta como fallecidos.
+    """
+    try:
+        resumen = padron_service.actualizar_padron(
+            eleccion_id=eleccion_id,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except padron_service.PadronError as e:
+        return jsonify({"error": str(e)}), 400
+    except segip_service.SegipError as e:
+        return jsonify({"error": f"Error al conectar con SEGIP: {e}"}), 502
+
+    return jsonify(resumen)
+
+
+@bp.route("/<int:padron_id>/recinto", methods=["PUT"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def asignar_recinto(eleccion_id, padron_id):
+    """Botón 'Asignar recinto y mesa' a un votante del padrón."""
+    data = request.get_json(silent=True) or {}
+    recinto_id = data.get("recinto_id")
+    mesa_numero = data.get("mesa_numero")
+
+    if not recinto_id or not mesa_numero:
+        return jsonify({"error": "recinto_id y mesa_numero son requeridos"}), 400
+
+    try:
+        padron_service.asignar_recinto(
+            padron_id=padron_id,
+            recinto_id=recinto_id,
+            mesa_numero=mesa_numero,
+            usuario_id=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except padron_service.PadronError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"mensaje": "Recinto y mesa asignados correctamente"})
+
+
+@bp.route("/buscar/<string:ci>", methods=["GET"])
+@rol_requerido(Usuario.ROL_ADMIN, Usuario.ROL_OPERADOR)
+def buscar(eleccion_id, ci):
+    """Usado por el operador (PC3) antes de habilitar el kiosco."""
+    votante = padron_service.buscar_votante(eleccion_id, ci)
+    if not votante:
+        return jsonify({"error": "Ciudadano no encontrado en el padrón de esta elección"}), 404
+
+    return jsonify(_serializar(votante))

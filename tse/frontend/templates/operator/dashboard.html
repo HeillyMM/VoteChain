@@ -1,170 +1,73 @@
 {% extends "base.html" %}
-
-{% block title %}
-Panel Operador Electoral
-{% endblock %}
+{% block title %}Mis kioscos · Voto Cadena{% endblock %}
 
 {% block content %}
-
-<div class="mb-4">
-
-    <h1 class="fw-bold">
-        Panel del Operador Electoral
-    </h1>
-
-    <p class="text-muted">
-        Gestión y verificación de ciudadanos habilitados para participar en el proceso electoral.
-    </p>
-
+<div class="page-header">
+  <div>
+    <div class="eyebrow">Panel de operador</div>
+    <h1>Mis kioscos</h1>
+  </div>
+  {% if eleccion %}
+  <span class="badge badge-verde">{{ eleccion.titulo }}</span>
+  {% endif %}
 </div>
 
-<div class="row g-4">
-
-    <div class="col-lg-4">
-
-        <div class="card h-100 text-center shadow-sm">
-
-            <div class="card-body">
-
-                <h1>🪪</h1>
-
-                <h5 class="card-title">
-                    Verificar Ciudadano
-                </h5>
-
-                <p class="text-muted">
-                    Consultar la información de un ciudadano mediante su cédula de identidad.
-                </p>
-
-                <a href="{{url_for('bp_padron.verificar',eleccion_id=1)}}"
-                   class="btn btn-primary w-100">
-
-                    Verificar
-
-                </a>
-
-            </div>
-
-        </div>
-
+{% if not kioscos %}
+<div class="empty">
+  No hay kioscos activos asignados a tu recinto.
+</div>
+{% else %}
+<div class="card-row">
+  {% for k in kioscos %}
+  {% set est = estados_kiosco.get(k.id, {'estado': 'libre'}) %}
+  <div class="card">
+    <div class="flex-between">
+      <div style="font-weight:bold;font-size:1.05rem">{{ k.nombre }}</div>
+      {% if est.estado == 'habilitado' %}
+      <span class="badge badge-verde">Habilitado</span>
+      {% else %}
+      <span class="badge badge-gris">Libre</span>
+      {% endif %}
     </div>
 
-    <div class="col-lg-4">
-
-        <div class="card h-100 text-center shadow-sm">
-
-            <div class="card-body">
-
-                <h1>👥</h1>
-
-                <h5 class="card-title">
-                    Padrón Electoral
-                </h5>
-
-                <p class="text-muted">
-                    Consultar el listado de ciudadanos registrados en el sistema.
-                </p>
-
-                <a href="/operador/ciudadanos"
-                   class="btn btn-success w-100">
-
-                    Consultar
-
-                </a>
-
-            </div>
-
-        </div>
-
+    <div style="text-align:center;margin:1rem 0">
+      <div class="muted" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.06em">Código de vinculación</div>
+      <div class="mono" style="font-size:1.6rem;font-weight:bold;letter-spacing:.1em">{{ k.codigo_vinculacion }}</div>
     </div>
 
-    <div class="col-lg-4">
-
-        <div class="card h-100 text-center shadow-sm">
-
-            <div class="card-body">
-
-                <h1>✅</h1>
-
-                <h5 class="card-title">
-                    Ciudadanos Habilitados
-                </h5>
-
-                <p class="text-muted">
-                    Visualizar los ciudadanos que se encuentran habilitados para votar.
-                </p>
-
-                <a href="/operador/habilitados"
-                   class="btn btn-warning w-100">
-
-                    Consultar
-
-                </a>
-
-            </div>
-
-        </div>
-
+    {% if est.estado == 'habilitado' %}
+    <div class="timer-pill" style="width:100%;justify-content:center" id="timer-{{ k.id }}"
+         data-segundos="{{ est.segundos }}">
+      ⏱ <span id="tiempo-{{ k.id }}">{{ est.segundos }}s</span>
     </div>
-
+    {% endif %}
+  </div>
+  {% endfor %}
 </div>
 
-<div class="row mt-5">
+<script>
+// Countdown para cada kiosco habilitado
+document.querySelectorAll('[data-segundos]').forEach(function(el) {
+  var kId = el.id.replace('timer-', '');
+  var span = document.getElementById('tiempo-' + kId);
+  var secs = parseInt(el.dataset.segundos);
 
-    <div class="col-md-4">
-
-        <div class="card text-center">
-
-            <div class="card-body">
-
-                <h2>1,250</h2>
-
-                <p class="text-muted">
-                    Ciudadanos Registrados
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-4">
-
-        <div class="card text-center">
-
-            <div class="card-body">
-
-                <h2>1,180</h2>
-
-                <p class="text-muted">
-                    Ciudadanos Habilitados
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-4">
-
-        <div class="card text-center">
-
-            <div class="card-body">
-
-                <h2>70</h2>
-
-                <p class="text-muted">
-                    Ciudadanos Inhabilitados
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
+  var iv = setInterval(function() {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(iv);
+      el.style.background = 'var(--rojo-bg)';
+      el.style.borderColor = '#f6d3cf';
+      el.style.color = 'var(--rojo)';
+      span.textContent = 'Sesión expirada';
+    } else {
+      var m = Math.floor(secs / 60);
+      var s = secs % 60;
+      span.textContent = (m > 0 ? m + 'm ' : '') + s + 's';
+    }
+  }, 1000);
+});
+</script>
+{% endif %}
 
 {% endblock %}

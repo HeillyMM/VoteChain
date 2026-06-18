@@ -1,10 +1,12 @@
-from flask import request, jsonify
-from models import ApiKey
 import hashlib
 from functools import wraps
 
-# http://localhost:5001/ciudadanos
-# Para obtener ciudadanos poner en header --> Authorization : Bearer TSE-SECRET-KEY-2025 
+from flask import request, jsonify
+from models import ApiKey
+
+# Para obtener ciudadanos, en el header poner:
+# Authorization: Bearer TSE-SECRET-KEY-2025
+
 
 def require_api_key(func):
     @wraps(func)

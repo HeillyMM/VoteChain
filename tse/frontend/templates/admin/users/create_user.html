@@ -1,133 +1,75 @@
 {% extends "base.html" %}
-
-{% block title %}Registrar Usuario{% endblock %}
+{% block title %}Nuevo usuario · Voto Cadena{% endblock %}
 
 {% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow"><a href="{{ url_for('panel.usuarios') }}">Usuarios</a></div>
+    <h1>Nuevo usuario</h1>
+  </div>
+</div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-
-    <div class="mb-4">
-        <span class="badge bg-primary mb-2">Administración</span>
-        <h2 class="fw-bold mb-1">Registrar Usuario</h2>
-        <p class="text-muted">
-            Cree nuevos administradores, operadores o auditores del sistema.
-        </p>
+<div class="card" style="max-width:560px">
+  <form method="POST" action="{{ url_for('panel.nuevo_usuario') }}">
+    <div class="field-row">
+      <div class="field">
+        <label for="ci">CI</label>
+        <input type="text" id="ci" name="ci" required class="mono" placeholder="ej. 1234567">
+      </div>
+      <div class="field">
+        <label for="rol_id">Rol</label>
+        <select id="rol_id" name="rol_id" required onchange="toggleRecinto(this.value)">
+          {% for r in roles %}
+          <option value="{{ r.id }}">{{ r.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
 
-    <form method="POST">
+    <div class="field-row">
+      <div class="field">
+        <label for="nombres">Nombres</label>
+        <input type="text" id="nombres" name="nombres" required>
+      </div>
+      <div class="field">
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" name="apellidos" required>
+      </div>
+    </div>
 
-        <div class="row g-3">
+    <div class="field">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" name="email" required>
+    </div>
 
-            <div class="col-md-6">
-                <label class="form-label">CI</label>
-                <input type="text"
-                       name="ci"
-                       class="form-control"
-                       required>
-            </div>
+    <div class="field">
+      <label for="password">Contraseña inicial</label>
+      <input type="password" id="password" name="password" required minlength="8">
+      <small class="muted">Mínimo 8 caracteres. El usuario deberá cambiarla en su primer ingreso.</small>
+    </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Correo Electrónico</label>
-                <input type="email"
-                       name="email"
-                       class="form-control"
-                       required>
-            </div>
+    <div class="field" id="campo-recinto" style="display:none">
+      <label for="recinto_id">Recinto asignado</label>
+      <select id="recinto_id" name="recinto_id">
+        <option value="">— selecciona un recinto —</option>
+        {% for r in recintos %}
+        <option value="{{ r.id }}">{{ r.nombre }} ({{ r.departamento.nombre }})</option>
+        {% endfor %}
+      </select>
+      <small class="muted">Obligatorio para operadores.</small>
+    </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Nombres</label>
-                <input type="text"
-                       name="nombres"
-                       class="form-control"
-                       required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Apellidos</label>
-                <input type="text"
-                       name="apellidos"
-                       class="form-control"
-                       required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Contraseña</label>
-                <input type="password"
-                       name="password"
-                       class="form-control"
-                       required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Rol</label>
-                <select name="rol_id"
-                        id="rol_id"
-                        class="form-select"
-                        required>
-
-                    <option value="">Seleccione un rol</option>
-                    <option value="1">Administrador</option>
-                    <option value="2">Operador</option>
-                    <option value="3">Auditor</option>
-
-                </select>
-            </div>
-
-            <div class="col-md-12 d-none" id="recinto-container">
-                <label class="form-label">Recinto Asignado</label>
-
-                <select name="recinto_id"
-                        class="form-select">
-                    <option value="" selected disabled>Seleccionar recinto</option>
-                    {% for recinto in recintos %}
-                    <option value="{{ recinto.id }}">
-                        {{ recinto.nombre }} | Departamento: {{recinto.departamento_id}}
-                    </option>
-                    {% endfor %}
-
-                </select>
-
-                <small class="text-muted">
-                    Obligatorio para operadores.
-                </small>
-            </div>
-
-        </div>
-
-        <div class="border-top mt-4 pt-3 d-flex gap-2">
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Registrar Usuario
-            </button>
-
-            <a href="{{ url_for('bp_auth.usuarios') }}"
-               class="btn btn-outline-secondary">
-                Cancelar
-            </a>
-
-        </div>
-
-    </form>
-
-</div>
-```
-
+    <div class="gap-actions">
+      <button type="submit" class="btn btn-primary">Crear usuario</button>
+      <a href="{{ url_for('panel.usuarios') }}" class="btn btn-ghost">Cancelar</a>
+    </div>
+  </form>
 </div>
 
 <script>
-document.getElementById("rol_id").addEventListener("change", function() {
-
-    const recintoContainer =
-        document.getElementById("recinto-container");
-
-    if (this.value === "2") {
-        recintoContainer.classList.remove("d-none");
-    } else {
-        recintoContainer.classList.add("d-none");
-    }
-});
+function toggleRecinto(rolId) {
+  document.getElementById('campo-recinto').style.display = rolId == '2' ? '' : 'none';
+}
+toggleRecinto(document.getElementById('rol_id').value);
 </script>
-
 {% endblock %}

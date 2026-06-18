@@ -1,41 +1,81 @@
-from flask import Flask
-from app.extensions import db,bcrypt,login_manager,migrate
-from app.models import * 
 import os
+from flask import Flask
+from app.config import Config
+from app.extensions import db, jwt
+
+# __file__ = /app/backend/app/__init__.py
+# dirname x1 = /app/backend/app
+# dirname x2 = /app/backend
+# dirname x3 = /app  ← aquí está frontend/
+_BASE      = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_TEMPLATES = os.path.abspath(os.path.join(_BASE, 'frontend', 'templates'))
+_STATIC    = os.path.abspath(os.path.join(_BASE, 'frontend', 'static'))
+
 
 def create_app():
-    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    app = Flask(__name__, template_folder=_TEMPLATES, static_folder=_STATIC)
+    app.config.from_object(Config)
 
-    app = Flask(
-        __name__,
-        template_folder=os.path.join(BASE_DIR, "frontend", "templates"),
-        static_folder=os.path.join(BASE_DIR, "frontend", "static")
-    )
-
-    app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
-
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    from app.routes.padron import bp_padron
-    from app.routes.auth import bp_auth
-    from app.routes.elections import bp_eleccion
-    from app.routes.candidates import bp_candidato
-    from app.routes.recinto import bp_recinto
-
-    app.register_blueprint(bp_padron, url_prefix="/padron")
-    app.register_blueprint(bp_auth, url_prefix="/")
-    app.register_blueprint(bp_eleccion)
-    app.register_blueprint(bp_candidato)
-    app.register_blueprint(bp_recinto)
-
-    bcrypt.init_app(app)
     db.init_app(app)
-    login_manager.init_app(app)
-    migrate.init_app(app,db)
+    jwt.init_app(app)
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        return Usuario.query.get(int(user_id))
+    from app import models  # noqa: F401
+
+    from app.routes import auth, elections, candidates, padron, kiosk, votes, results, audit
+
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(elections.bp)
+    app.register_blueprint(candidates.bp)
+    app.register_blueprint(padron.bp)
+    app.register_blueprint(kiosk.bp)
+    app.register_blueprint(votes.bp)
+    app.register_blueprint(results.bp)
+    app.register_blueprint(results.bp_pub)
+    app.register_blueprint(audit.bp)
+
+    from app.views.auth_web import bp as auth_web_bp
+    from app.views.panel import bp as panel_bp
+    from app.views.operador import bp as operador_bp
+
+    app.register_blueprint(auth_web_bp)
+    app.register_blueprint(panel_bp)
+    app.register_blueprint(operador_bp)
+
+    @app.route("/votacion")
+    def kiosco_ballot():
+        from flask import render_template as _rt
+        return _rt("voter/ballot.html")
+
+    @app.route("/blockchain/health", methods=["GET"])
+    def health():
+        from app.blockchain import node_sync
+        return {"activo": True, "nodo": node_sync.NODO_ACTUAL}
+
+    @app.route("/blockchain/cadena/<int:eleccion_id>", methods=["GET"])
+    def cadena_publica(eleccion_id):
+        from app.blockchain import node_sync
+        return node_sync.obtener_cadena(eleccion_id)
+
+    @app.route("/blockchain/recibir_bloque", methods=["POST"])
+    def recibir_bloque():
+        from flask import request, jsonify
+        from app.blockchain import node_sync
+
+        data = request.get_json(silent=True) or {}
+        eleccion_id = data.get("eleccion_id")
+        block_data = data.get("block")
+
+        if not eleccion_id or not block_data:
+            return jsonify({"error": "eleccion_id y block son requeridos"}), 400
+
+        ok, motivo = node_sync.recibir_bloque(eleccion_id, block_data)
+        if not ok:
+            return jsonify({"aceptado": False, "motivo": motivo}), 409
+
+        return jsonify({"aceptado": True})
+
+    @app.route("/api/health", methods=["GET"])
+    def api_health():
+        return {"status": "ok", "servicio": "TSE Backend"}
 
     return app

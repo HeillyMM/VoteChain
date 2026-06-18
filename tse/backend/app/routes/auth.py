@@ -1,103 +1,168 @@
-from flask import Blueprint, render_template, request, flash,abort,redirect,url_for
-from flask_login import logout_user,login_required,current_user
-from app.services.auth_service import AuthService
-from app.models.usuario import Usuario
-from app.models.recinto import Recinto
-from app.routes.elections import bp_eleccion
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 
-bp_auth = Blueprint("bp_auth", __name__)
+from app.models import Usuario
+from app.services import auth_service
+from app.decorators import rol_requerido, usuario_actual
 
-@bp_auth.route("/", methods=["GET", "POST"])
+bp = Blueprint("auth", __name__, url_prefix="/api/auth")
+
+
+@bp.route("/login", methods=["POST"])
 def login():
-    if request.method == "GET":
-        return render_template("auth/login.html")
+    data = request.get_json(silent=True) or {}
+    email = data.get("email")
+    password = data.get("password")
 
-    email = request.form.get("email")
-    password = request.form.get("password")
+    if not email or not password:
+        return jsonify({"error": "email y password son requeridos"}), 400
 
-    user = AuthService.login(email, password)
-    if not user:
-        flash("Credenciales incorrectas", "danger")
-        return render_template("auth/login.html")
+    try:
+        usuario = auth_service.autenticar(email, password, ip=request.remote_addr)
+    except auth_service.AuthError as e:
+        return jsonify({"error": str(e)}), 401
 
-    if current_user.rol_id == 1:
-        return redirect(url_for('bp_eleccion.index'))
-    elif current_user.rol_id == 2:
-        return render_template("operator/dashboard.html")
-    else:
-        return render_template("audit/dashboard.html")
-    
-@bp_auth.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return render_template("auth/login.html")
-    
-@bp_auth.route("/register",methods=['GET','POST'])
-@login_required
-def register():
-    if current_user.rol_id != 1:
-        abort(403)
-    if request.method == 'POST':
-            try:
-                ci = request.form.get('ci')
-                nombres = request.form.get('nombres')
-                apellidos = request.form.get('apellidos')
-                email = request.form.get('email')
-                password = request.form.get('password')
-                rol_id = request.form.get('rol_id')
+    token = create_access_token(
+        identity=str(usuario.id),
+        additional_claims={
+            "rol_id": usuario.rol_id,
+            "rol_nombre": usuario.rol.nombre,
+            "nombre_completo": usuario.nombre_completo,
+            "recinto_id": usuario.recinto_id,
+        },
+    )
 
-                AuthService.crear_usuario(ci,nombres,apellidos,email,password,rol_id)
-                flash("Usuario registrado exitosamente","success")
+    return jsonify(
+        {
+            "access_token": token,
+            "usuario": {
+                "id": usuario.id,
+                "ci": usuario.ci,
+                "nombre_completo": usuario.nombre_completo,
+                "email": usuario.email,
+                "rol_id": usuario.rol_id,
+                "rol_nombre": usuario.rol.nombre,
+                "recinto_id": usuario.recinto_id,
+            },
+        }
+    )
 
-            except ValueError as e:
-                flash(str(e),"error")
 
-            return redirect(url_for('bp_auth.usuarios'))
-    recintos = Recinto.query.all()
-    return render_template("admin/users/create_user.html",recintos=recintos)
+@bp.route("/me", methods=["GET"])
+@jwt_required()
+def me():
+    usuario = usuario_actual()
+    if not usuario:
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
-@bp_auth.route("/change_password/<int:id>",methods=['GET','POST'])
-@login_required
-def change_password(id):
-    if current_user.rol_id != 1:
-        abort(403)
-    if request.method == 'POST':
-        try:
-            password = request.form.get('password')
-            AuthService.cambiar_password(id,password)
+    return jsonify(
+        {
+            "id": usuario.id,
+            "ci": usuario.ci,
+            "nombre_completo": usuario.nombre_completo,
+            "email": usuario.email,
+            "rol_id": usuario.rol_id,
+            "rol_nombre": usuario.rol.nombre,
+            "recinto_id": usuario.recinto_id,
+            "recinto_nombre": usuario.recinto.nombre if usuario.recinto else None,
+        }
+    )
 
-            flash("Contraseña cambiada exitosamente","success")
 
-        except ValueError as e:
-            flash(str(e),"error")
-            
-            return redirect(url_for('bp_auth.usuarios'))
-    return render_template("admin/users/change_password.html")
+# ──────────────────────────────────────────────────────────────
+#  Gestión de usuarios (solo ADMIN)
+# ──────────────────────────────────────────────────────────────
 
-@bp_auth.route("/usuarios")
-def usuarios():
-    usuarios = Usuario.query.all()
-    return render_template("admin/users/users.html",usuarios=usuarios)
+@bp.route("/usuarios", methods=["GET"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def listar_usuarios():
+    rol_id = request.args.get("rol_id", type=int)
+    usuarios = auth_service.listar_usuarios(rol_id=rol_id)
+    return jsonify(
+        [
+            {
+                "id": u.id,
+                "ci": u.ci,
+                "nombre_completo": u.nombre_completo,
+                "email": u.email,
+                "rol_id": u.rol_id,
+                "rol_nombre": u.rol.nombre,
+                "recinto_id": u.recinto_id,
+                "recinto_nombre": u.recinto.nombre if u.recinto else None,
+                "activo": u.activo,
+            }
+            for u in usuarios
+        ]
+    )
 
-@bp_auth.route("/editar/<int:usuario_id>",methods=['GET','POST'])
-def editar(usuario_id):
-    if request.method == 'POST':
-        ci = request.form.get('ci')
-        nombres = request.form.get('nombres')
-        apellidos = request.form.get('apellidos')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        rol_id = request.form.get('rol_id')
 
-        AuthService.editar_usuario(ci=ci,nombres=nombres,apellidos=apellidos,email=email,password=password,rol_id=rol_id,usuario_id=usuario_id)
-        return redirect(url_for('bp_auth.usuarios'))
+@bp.route("/usuarios", methods=["POST"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def crear_usuario():
+    data = request.get_json(silent=True) or {}
 
-    usuario = Usuario.query.get(usuario_id)
-    recintos = Recinto.query.all()
-    return render_template("admin/users/edit_user.html",usuario=usuario,recintos=recintos)
+    requeridos = ("ci", "nombres", "apellidos", "email", "password", "rol_id")
+    faltantes = [c for c in requeridos if not data.get(c)]
+    if faltantes:
+        return jsonify({"error": f"Campos requeridos faltantes: {', '.join(faltantes)}"}), 400
 
-@bp_auth.route("/eliminar/<int:usuario_id>")
-def eliminar(usuario_id):
-    AuthService.eliminar(usuario_id)
-    return redirect(url_for('bp_auth.usuarios'))
+    try:
+        usuario = auth_service.crear_usuario(
+            ci=data["ci"],
+            nombres=data["nombres"],
+            apellidos=data["apellidos"],
+            email=data["email"],
+            password=data["password"],
+            rol_id=data["rol_id"],
+            recinto_id=data.get("recinto_id"),
+            creado_por=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except auth_service.AuthError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"id": usuario.id, "mensaje": "Usuario creado correctamente"}), 201
+
+
+@bp.route("/usuarios/<int:usuario_id>/password", methods=["PUT"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def cambiar_password(usuario_id):
+    data = request.get_json(silent=True) or {}
+    nueva = data.get("password")
+    if not nueva or len(nueva) < 6:
+        return jsonify({"error": "La contraseña debe tener al menos 6 caracteres"}), 400
+
+    try:
+        auth_service.cambiar_password(
+            usuario_id=usuario_id,
+            nueva_password=nueva,
+            cambiado_por=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except auth_service.AuthError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"mensaje": "Contraseña actualizada"})
+
+
+@bp.route("/usuarios/<int:usuario_id>", methods=["DELETE"])
+@rol_requerido(Usuario.ROL_ADMIN)
+def eliminar_usuario(usuario_id):
+    """
+    El administrador puede eliminar (desactivar) a operadores u otros
+    administradores, siempre con justificación obligatoria.
+    """
+    data = request.get_json(silent=True) or {}
+    justificacion = data.get("justificacion", "")
+
+    try:
+        auth_service.eliminar_usuario(
+            usuario_id=usuario_id,
+            justificacion=justificacion,
+            eliminado_por=int(get_jwt_identity()),
+            ip=request.remote_addr,
+        )
+    except auth_service.AuthError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"mensaje": "Usuario desactivado correctamente"})

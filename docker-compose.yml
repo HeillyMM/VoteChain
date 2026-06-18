@@ -1,43 +1,119 @@
+version: "3.9"
+
 services:
 
-  tse:
-    build:
-      context: ./tse
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
-    environment:
-      DATABASE_URL: mysql+pymysql://root:root123@mariadb/tse_db
-      SEGIP_URL: http://segip:5001
-    volumes:
-    - ./tse/backend:/app/backend
-    - ./tse/frontend:/app/frontend
-    depends_on:
-      - mariadb
-      - segip
-      
-  segip:
-    build: ./segip
-    ports:
-      - "5001:5001"
-    environment:
-      DATABASE_URL: mysql+pymysql://root:root123@mariadb/segip_db
-    volumes:
-    - ./segip:/app
-    depends_on:
-      - mariadb
-
-  mariadb:
-    image: mariadb:11
-    container_name: voting_mariadb
+  db:
+    image: mysql:8.0
+    container_name: votacion_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: root_pass
     ports:
       - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
-      - ./sivel.sql:/docker-entrypoint-initdb.d/sivel.sql
+      - db_data:/var/lib/mysql
+      - ./init_final.sql:/docker-entrypoint-initdb.d/init_final.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  segip:
+    build: ./segip
+    container_name: segip_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://segip_user:segip_pass@db:3306/segip_db
+      FLASK_DEBUG: "1"
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./segip:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tse_nodo1:
+    build: ./tse
+    container_name: tse_nodo1
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://tse_user:tse_pass@db:3306/tse_db
+      SEGIP_API_URL: http://segip:5001
+      SEGIP_API_KEY: TSE-SECRET-KEY-2025
+      NODE_ID: "1"
+      NODO_1_URL: http://tse_nodo1:5000
+      NODO_2_URL: http://tse_nodo2:5000
+      NODO_3_URL: http://tse_nodo3:5000
+      SECRET_KEY: cambia-esta-clave
+      JWT_SECRET_KEY: cambia-esta-clave-jwt
+      FLASK_DEBUG: "1"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./tse:/app
+      - tse_nodo1_chain:/app/blockchain_data
+    depends_on:
+      db:
+        condition: service_healthy
+      segip:
+        condition: service_started
+
+  tse_nodo2:
+    build: ./tse
+    container_name: tse_nodo2
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://tse_user:tse_pass@db:3306/tse_db
+      SEGIP_API_URL: http://segip:5001
+      SEGIP_API_KEY: TSE-SECRET-KEY-2025
+      NODE_ID: "2"
+      NODO_1_URL: http://tse_nodo1:5000
+      NODO_2_URL: http://tse_nodo2:5000
+      NODO_3_URL: http://tse_nodo3:5000
+      SECRET_KEY: cambia-esta-clave
+      JWT_SECRET_KEY: cambia-esta-clave-jwt
+      FLASK_DEBUG: "1"
+    ports:
+      - "5010:5000"
+    volumes:
+      - ./tse:/app
+      - tse_nodo2_chain:/app/blockchain_data
+    depends_on:
+      db:
+        condition: service_healthy
+      segip:
+        condition: service_started
+
+  tse_nodo3:
+    build: ./tse
+    container_name: tse_nodo3
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://tse_user:tse_pass@db:3306/tse_db
+      SEGIP_API_URL: http://segip:5001
+      SEGIP_API_KEY: TSE-SECRET-KEY-2025
+      NODE_ID: "3"
+      NODO_1_URL: http://tse_nodo1:5000
+      NODO_2_URL: http://tse_nodo2:5000
+      NODO_3_URL: http://tse_nodo3:5000
+      SECRET_KEY: cambia-esta-clave
+      JWT_SECRET_KEY: cambia-esta-clave-jwt
+      FLASK_DEBUG: "1"
+    ports:
+      - "5020:5000"
+    volumes:
+      - ./tse:/app
+      - tse_nodo3_chain:/app/blockchain_data
+    depends_on:
+      db:
+        condition: service_healthy
+      segip:
+        condition: service_started
 
 volumes:
-  mariadb_data:
+  db_data:
+  tse_nodo1_chain:
+  tse_nodo2_chain:
+  tse_nodo3_chain:

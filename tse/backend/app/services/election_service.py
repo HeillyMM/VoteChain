@@ -1,180 +1,196 @@
 from app.extensions import db
-from app.models.election import Eleccion
-from app.models.conteo import Conteo
-
-from app.blockchain.crypto import (
-    generar_par_claves_eleccion,
-    cargar_clave_privada,
-    VoteCipher
-)
-
+from app.models import Eleccion, Recinto, RecintoEleccion, Departamento, Candidato
+from app.blockchain.crypto import generar_par_claves_eleccion
 from app.blockchain.chain import Blockchain
-from datetime import datetime
+from app.services.audit_service import registrar_evento
 
-class EleccionService:
 
-    @staticmethod
-    def listar():
-        return Eleccion.query.all()
+class ElectionError(Exception):
+    pass
 
-    @staticmethod
-    def obtener_por_id(id):
-        return Eleccion.query.get(id)
-    
-    
-    @staticmethod
-    def actualizar_estado():
-        elecciones = Eleccion.query.all()
-        if not elecciones:
-            return
 
-        hoy = datetime.utcnow()
+def crear_eleccion(
+    codigo: str,
+    titulo: str,
+    descripcion: str,
+    tipo: str,
+    departamento_id: int,
+    fecha_inicio,
+    fecha_fin,
+    usuario_id: int,
+    ip: str | None = None,
+) -> Eleccion:
+    """
+    Crea una elección para UN departamento (cada departamento maneja su
+    propia elección presidencial, para control independiente).
+    Genera el par de claves RSA (pública/privada) y crea el bloque génesis
+    de su blockchain.
+    """
+    if Eleccion.query.filter_by(codigo=codigo).first():
+        raise ElectionError("Ya existe una elección con ese código")
 
-        for eleccion in elecciones:
-            if eleccion.estado == "SUSPENDIDA":
-                continue
-            if hoy < eleccion.fecha_inicio:
-                eleccion.estado = "CONFIGURACIÓN"
-            elif eleccion.fecha_inicio <= hoy <= eleccion.fecha_fin:
-                eleccion.estado = "ACTIVA"
-            else:
-                eleccion.estado = "CERRADA"
-        db.session.commit()
+    departamento = Departamento.query.get(departamento_id)
+    if not departamento:
+        raise ElectionError("Departamento inválido")
 
-    @staticmethod
-    def listar_elecciones():
-        elecciones = Eleccion.query.order_by(Eleccion.fecha_inicio.asc()).all()
-        elecciones = sorted(elecciones,key=lambda e: e.estado in ["SUSPENDIDA", "CERRADA"])
-        if not elecciones:
-            return None, []
-        if elecciones[0].estado in ["SUSPENDIDA", "CERRADA"]:
-            return None, elecciones
+    clave_publica, clave_privada = generar_par_claves_eleccion()
 
-        return elecciones[0], elecciones[1:]
+    eleccion = Eleccion(
+        codigo=codigo,
+        titulo=titulo,
+        descripcion=descripcion,
+        tipo=tipo,
+        estado="CONFIGURACION",
+        departamento_id=departamento_id,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        clave_publica_pem=clave_publica,
+        clave_privada_pem=clave_privada,
+        created_by=usuario_id,
+    )
+    db.session.add(eleccion)
+    db.session.commit()
 
-    @staticmethod
-    def crear(
-        codigo,
-        titulo,
-        descripcion,
-        tipo,
-        fecha_inicio,
-        fecha_fin,
-        created_by
-    ):
-        hoy = datetime.utcnow()
+    # Inicializa la blockchain (crea bloque génesis en disco)
+    Blockchain.get_instance(eleccion.id)
 
-        if fecha_inicio < hoy:
-            raise ValueError("No se puede crear una elección con fecha de inicio pasada.")
+    registrar_evento(
+        usuario_id=usuario_id,
+        eleccion_id=eleccion.id,
+        accion="ELECCION_CREADA",
+        descripcion=f"Elección '{titulo}' creada para {departamento.nombre}",
+        ip=ip,
+    )
+    return eleccion
 
-        if fecha_fin < fecha_inicio:
-            raise ValueError("La fecha de finalización debe ser posterior a la fecha de inicio.")
 
-        conflicto = Eleccion.query.filter(Eleccion.fecha_inicio <= fecha_fin,Eleccion.fecha_fin >= fecha_inicio).first()
+def actualizar_eleccion(eleccion_id: int, datos: dict, usuario_id: int, ip: str | None = None) -> Eleccion:
+    eleccion = Eleccion.query.get(eleccion_id)
+    if not eleccion:
+        raise ElectionError("Elección no encontrada")
 
-        if conflicto:
-            raise ValueError(f"Las fechas se cruzan con la elección '{conflicto.titulo}'.")
-
-        clave_publica, clave_privada = generar_par_claves_eleccion()
-        eleccion = Eleccion(
-            codigo=codigo,
-            titulo=titulo,
-            descripcion=descripcion,
-            tipo=tipo,
-            estado="CONFIGURACION",
-            fecha_inicio=fecha_inicio,
-            fecha_fin=fecha_fin,
-            clave_publica_pem=clave_publica,
-            clave_privada_pem=clave_privada,
-            created_by=created_by
-        )
-
-        db.session.add(eleccion)
-        db.session.commit()
-        Blockchain.get_instance(eleccion.id)
-        
-
-    @staticmethod
-    def editar(
-        codigo,
-        titulo,
-        descripcion,
-        tipo,
-        fecha_inicio,
-        fecha_fin,
-        eleccion_id,
-        estado
-    ):
-
-        eleccion = Eleccion.query.get(eleccion_id)
-        eleccion.codigo=codigo
-        eleccion.titulo=titulo
-        eleccion.descripcion=descripcion
-        eleccion.tipo=tipo
-        eleccion.estado=estado
-        eleccion.fecha_inicio=fecha_inicio
-        eleccion.fecha_fin=fecha_fin
-
-        db.session.commit()
-
-        Blockchain.get_instance(eleccion.id)
-
-        return eleccion
-
-    @staticmethod
-    def cerrar(id):
-
-        eleccion = Eleccion.query.get(id)
-
-        if not eleccion:
-            return None
-
-        blockchain = Blockchain.get_instance(id)
-
-        private_key = cargar_clave_privada(
-            eleccion.clave_privada_pem
-        )
-
-        cipher = VoteCipher()
-
-        votos = {}
-
-        for tx in blockchain.get_transactions():
-
-            candidato_id = cipher.decrypt(
-                tx["encrypted_vote"],
-                private_key
+    if eleccion.estado != "CONFIGURACION":
+        campos_permitidos = {"estado"}
+        if set(datos.keys()) - campos_permitidos:
+            raise ElectionError(
+                "Solo se pueden editar los datos de la elección mientras está en CONFIGURACION"
             )
 
-            votos[candidato_id] = (
-                votos.get(candidato_id, 0) + 1
+    for campo in ("titulo", "descripcion", "tipo", "fecha_inicio", "fecha_fin"):
+        if campo in datos:
+            setattr(eleccion, campo, datos[campo])
+
+    db.session.commit()
+
+    registrar_evento(
+        usuario_id=usuario_id,
+        eleccion_id=eleccion.id,
+        accion="ELECCION_ACTUALIZADA",
+        descripcion=f"Elección '{eleccion.titulo}' actualizada",
+        ip=ip,
+    )
+    return eleccion
+
+
+def cambiar_estado(eleccion_id: int, nuevo_estado: str, usuario_id: int, ip: str | None = None) -> Eleccion:
+    """
+    Transiciones válidas:
+      CONFIGURACION -> ACTIVA
+      ACTIVA -> SUSPENDIDA / CERRADA
+      SUSPENDIDA -> ACTIVA / CERRADA
+    CERRADA es estado final.
+    """
+    eleccion = Eleccion.query.get(eleccion_id)
+    if not eleccion:
+        raise ElectionError("Elección no encontrada")
+
+    transiciones_validas = {
+        "CONFIGURACION": {"ACTIVA"},
+        "ACTIVA": {"SUSPENDIDA", "CERRADA"},
+        "SUSPENDIDA": {"ACTIVA", "CERRADA"},
+        "CERRADA": set(),
+    }
+
+    if nuevo_estado not in transiciones_validas.get(eleccion.estado, set()):
+        raise ElectionError(f"Transición inválida: {eleccion.estado} -> {nuevo_estado}")
+
+    if nuevo_estado == "ACTIVA" and eleccion.estado == "CONFIGURACION":
+        if Candidato.query.filter_by(eleccion_id=eleccion.id, activo=True).count() == 0:
+            raise ElectionError("No se puede activar una elección sin candidatos")
+
+    eleccion.estado = nuevo_estado
+    db.session.commit()
+
+    registrar_evento(
+        usuario_id=usuario_id,
+        eleccion_id=eleccion.id,
+        accion="ELECCION_ESTADO_CAMBIADO",
+        descripcion=f"Estado cambiado a {nuevo_estado}",
+        ip=ip,
+    )
+    return eleccion
+
+
+def asignar_recintos(eleccion_id: int, recinto_ids: list[int], usuario_id: int, ip: str | None = None):
+    eleccion = Eleccion.query.get(eleccion_id)
+    if not eleccion:
+        raise ElectionError("Elección no encontrada")
+
+    # limpiar asignaciones previas
+    RecintoEleccion.query.filter_by(eleccion_id=eleccion_id).delete()
+
+    for recinto_id in recinto_ids:
+        recinto = Recinto.query.get(recinto_id)
+        if not recinto:
+            continue
+        if recinto.departamento_id != eleccion.departamento_id:
+            raise ElectionError(
+                f"El recinto {recinto.codigo} no pertenece al departamento de la elección"
             )
+        db.session.add(RecintoEleccion(recinto_id=recinto_id, eleccion_id=eleccion_id))
 
-        # Limpiar conteos anteriores
-        Conteo.query.filter_by(
-            eleccion_id=id
-        ).delete()
+    db.session.commit()
 
-        # Crear nuevos conteos
-        for candidato_id, total in votos.items():
+    registrar_evento(
+        usuario_id=usuario_id,
+        eleccion_id=eleccion.id,
+        accion="RECINTOS_ASIGNADOS",
+        descripcion=f"{len(recinto_ids)} recintos asignados a la elección",
+        ip=ip,
+    )
+    return eleccion
 
-            conteo = Conteo(
-                eleccion_id=id,
-                candidato_id=candidato_id,
-                tipo="VALIDO",
-                total_votos=total
-            )
 
-            db.session.add(conteo)
+def listar_elecciones(departamento_id: int | None = None):
+    query = Eleccion.query
+    if departamento_id:
+        query = query.filter_by(departamento_id=departamento_id)
+    return query.order_by(Eleccion.created_at.desc()).all()
 
-        eleccion.estado = "CERRADA"
 
-        db.session.commit()
+def obtener_eleccion(eleccion_id: int) -> Eleccion:
+    eleccion = Eleccion.query.get(eleccion_id)
+    if not eleccion:
+        raise ElectionError("Elección no encontrada")
+    return eleccion
 
-        return eleccion
-    
-    @staticmethod
-    def eliminar(id):
-        eleccion = Eleccion.query.get(id)
-        db.session.delete(eleccion)
-        db.session.commit()
+
+def recintos_de_eleccion(eleccion_id: int) -> list[Recinto]:
+    return (
+        Recinto.query.join(RecintoEleccion, RecintoEleccion.recinto_id == Recinto.id)
+        .filter(RecintoEleccion.eleccion_id == eleccion_id)
+        .all()
+    )
+
+def obtener_eleccion_activa_por_recinto(recinto_id: int) -> Eleccion | None:
+    """
+    Busca una elección que esté en estado 'ACTIVA' y que tenga
+    asignado el recinto dado a través de la tabla intermedia RecintoEleccion.
+    """
+    return (
+        Eleccion.query
+        .join(RecintoEleccion, RecintoEleccion.eleccion_id == Eleccion.id)
+        .filter(RecintoEleccion.recinto_id == recinto_id)
+        .filter(Eleccion.estado == "ACTIVA")
+        .first()
+    )

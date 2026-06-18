@@ -1,116 +1,44 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Voto Cadena</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+  <div class="login-shell">
+    <div class="login-card">
+      <div class="tricolor"><span class="r"></span><span class="a"></span><span class="v"></span></div>
+      <div class="body">
+        <h1>Voto Cadena</h1>
+        <p class="muted">Tribunal Supremo Electoral · Bolivia</p>
 
-{% block title %}
-Iniciar Sesión
-{% endblock %}
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+          {% if mensajes %}
+            {% for categoria, mensaje in mensajes %}
+              <div class="alert alert-{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
 
-{% block content %}
+        <form method="POST" action="{{ url_for('auth_web.login') }}">
+          <div class="field">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" required autofocus>
+          </div>
+          <div class="field">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+        </form>
 
-<div class="row justify-content-center align-items-center">
-
-    <div class="col-lg-5 col-md-7">
-
-        <div class="card shadow-lg border-0">
-
-            <div class="card-body p-5">
-
-                <div class="text-center mb-4">
-
-                    <h1 class="display-6 fw-bold">
-                        🗳️ VoteChain
-                    </h1>
-
-                    <p class="text-muted">
-                        Sistema de Votación Electrónica
-                    </p>
-
-                </div>
-
-                <h3 class="text-center mb-4">
-                    Iniciar Sesión
-                </h3>
-
-                {% if error %}
-                    <div class="alert alert-danger text-center">
-                        {{ error }}
-                    </div>
-                {% endif %}
-
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} text-center">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
-                <form method="POST">
-                    {% if csrf_token %}
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    {% endif %}
-
-                    <div class="mb-3">
-
-                        <label class="form-label fw-semibold">
-                            Usuario (email)
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control form-control-lg"
-                            name="email"
-                            placeholder="Ingrese su email"
-                            required>
-
-                    </div>
-
-                    <div class="mb-4">
-
-                        <label class="form-label fw-semibold">
-                            Contraseña
-                        </label>
-
-                        <input
-                            type="password"
-                            class="form-control form-control-lg"
-                            name="password"
-                            placeholder="Ingrese su contraseña"
-                            required>
-
-                    </div>
-
-                    <div class="d-grid">
-
-                        <button
-                            type="submit"
-                            class="btn btn-primary btn-lg">
-
-                            Ingresar
-
-                        </button>
-
-                    </div>
-
-                </form>
-
-                <hr class="my-4">
-
-                <div class="text-center">
-
-                    <small class="text-muted">
-                        Tribunal Supremo Electoral - VoteChain
-                    </small>
-
-                </div>
-
-            </div>
-
-        </div>
-
+        <p class="muted mt-1" style="font-size:.8rem">
+          Acceso exclusivo para administradores, operadores de mesa y auditores del TSE.
+        </p>
+      </div>
     </div>
-
-</div>
-
-{% endblock %}
+  </div>
+</body>
+</html>
