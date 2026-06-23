@@ -31,6 +31,9 @@ def cerrar_y_contar(eleccion_id: int, usuario_id: int, ip: str | None = None) ->
     clave_privada = cargar_clave_privada(eleccion.clave_privada_pem)
     cipher = VoteCipher()
 
+    from app.blockchain.node_sync import sincronizar
+    sincronizar(eleccion_id)  # sincroniza antes de contar
+
     blockchain = Blockchain.get_instance(eleccion_id)
     transacciones = blockchain.get_transactions()
 
